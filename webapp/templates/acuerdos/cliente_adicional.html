@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+
+<div class="alert alert-primary" role="alert">
+    <h2>Agregar Clientes Adicionales</h2>
+</div>
+
+<h5>Principal</h5>
+{% for row in acuerdo_clientes: %}
+    <p>{{ row[0]  }} -- {{ row[1]  }} </p>
+{% endfor %}      
+
+<h5>Adicionales</h5>
+{% for row in acuerdo_clientes_add: %}
+    <td>{{ row[0]  }} -- {{ row[1]  }} -- {{ row[2]  }} </td>
+    <td><a href="/clientem_borrar/{{ idconsultor }}/{{ usuario }}/{{ pais }}/{{ idacuerdo }}/{{ row[0] }}" class="btn btn-light" data-toggle="tooltip" data-placement="top" title="Borrar Cliente de este acuerdo" > <i class="fas fa-trash"></i></a></td>
+   <br>
+{% endfor %}  
+
+<hr>
+<div class="col-sm-2">Agregar nuevo Cliente al acuerdo</div>
+<div class="col-sm-4">
+  <select id="cliente"  class="selectpicker show-tick" data-width="100%" data-live-search="true" >
+    <option data-divider="true"></option> 
+    {% for row in clientes: %}
+        <option value='{{ row[0] }}'>{{ row[0] }} | {{ row[1] }} </option> 
+    {% endfor %}                                   
+  </select>       
+</div>
+
+<hr>
+<td><button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Agregar Cliente" onclick="btn_guardar()">Guardar</button></td>
+<!-- <td><a class="btn btn-primary" href="/acuerdosdetalle/{{ idconsultor }}/{{ usuario }}/{{ pais }}" role="button"  data-toggle="tooltip" data-placement="top" >Volver</a></td> -->
+<hr>
+
+
+<script>
+
+function btn_guardar(){
+
+    // Obtiene los datos del formulario acuerdo_add
+    try {
+      var sel = document.getElementById("cliente");
+      var cliente= sel.options[sel.selectedIndex].text;
+      cliente = cliente.split('|');
+      idcliente = cliente[0].trim();
+      cliente = cliente[1].trim();
+    }
+    catch{
+      Swal.fire('Debe seleccionar un cliente!!!');
+      return
+
+    }    
+
+
+    $.ajax({
+    url:"/cliente_adicional_guardar/{{ idconsultor }}/{{ usuario }}/{{ pais }}/{{ idacuerdo}}/" + idcliente + "/" + cliente ,
+    type:"POST",
+    success: function(response){
+
+      Swal.fire(response);
+      location.reload();
+      
+    } 
+    
+    });
+  }
+
+  function btn_borrar(){
+
+
+$.ajax({
+url:"/cliente_adicional_guardar/{{ idconsultor }}/{{ usuario }}/{{ pais }}/{{ idacuerdo}}/" + idcliente + "/" + cliente + "/{{ idcliente }}" ,
+type:"POST",
+success: function(response){
+
+  Swal.fire(response);
+  location.reload();
+  
+} 
+
+});
+}  
+
+</script>      
+
+
+{% endblock %}

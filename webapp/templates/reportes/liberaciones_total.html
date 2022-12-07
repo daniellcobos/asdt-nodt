@@ -1,0 +1,183 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+
+
+{{ super() }}
+{% endblock %}
+{% block content %}
+
+
+<div class="alert alert-primary" role="alert">
+  <h2>Liberaciones Total</h2>
+</div>
+
+<hr>
+
+
+
+<table id="dt" class="table table-striped table-bordered nowrap">
+  <thead>
+    <tr>
+      <th>idacuerdo </th>
+      <th>Consultor </th>
+      <th>Id Cliente </th>
+      <th>Cliente </th>
+      <th>Duracion</th>
+      <th>Corte</th>
+      <th>Detalle Corte</th>
+      <th>Mes Entrega</th>
+      <th>Año Entrega</th>
+      <th>Meta Mes </th>
+      <th>Meta Periodo</th>
+      <th>Total Venta </th>
+      <th>%Freegoods acuerdo</th>
+      <th>Freegoods Teorico</th>
+      <th>Total Fgs </th>
+      <th>% Descuento </th>
+      <th>BOTOX </th>
+      <th>ULTRA </th>
+      <th>ULTRA PLUS </th>
+      <th>VOLBELLA </th>
+      <th>VOLIFT </th>
+      <th>VOLITE </th>
+      <th>VOLUMA </th>
+      <th>VOLUX </th>
+      <th>idcliente1 </th>
+      <th>Cliente1 </th>
+      <th>idcliente2 </th>
+      <th>Cliente2 </th>
+      <th>idcliente3 </th>
+      <th>Cliente3 </th>
+      <th>idcliente4 </th>
+      <th>Cliente4 </th>
+      <th>Banda </th>
+      <th>Banda Min. (Mes) </th>
+      <th>Banda Max. (Mes) </th>
+      <th>Cumplimiento</th>
+
+
+    </tr>
+  </thead>
+  <tbody id="tableBody">
+
+  </tbody>
+</table>
+    <div class="mt-1">
+    <span>Filtrar por año de entrega</span>
+    <form class="m-1" action="/liberaciones_total" method="post" >
+   <input type="radio" name="year" value="2021"> 2021
+    <input type="radio" name="year" value="2022"> 2022
+    <input type="radio" name="year" value="2023"> 2023
+<input type="submit" value="Filtrar">
+        </form>
+    </div>
+
+
+<script>
+  const data = {{ data1| safe}}
+  const tbody = document.getElementById("tableBody")
+  
+  for (row of data){
+
+    const newTr = document.createElement("tr")
+    for (i in row){
+
+      const newTd = document.createElement("td")
+      newTd.innerText = row[i]
+      if (i==35) {
+        if (row[i] == "Incumple"){
+          newTd.style = "background:red;"
+        }
+        else if  (row[i] == "Cumple"){
+          newTd.style = "background:yellow;"
+        }
+        else if  (row[i] == "Excede"){
+          newTd.style = "background: greenyellow;"
+        }
+      }
+      if (i == 12 || i == 15){
+          newTd.innerText = newTd.innerText + "%"
+        }
+      newTr.appendChild(newTd)
+     }
+     tbody.appendChild(newTr)
+  }
+  
+
+
+
+
+</script>
+
+<script>
+
+
+  $(document).ready(function () {
+
+    // Setup - add a text input to each footer cell
+    $('#dt thead tr').clone(true).appendTo('#dt thead');
+    $('#dt thead tr:eq(1) th').each(function (i) {
+      // coloca el filtro a las demas columnas
+      if (i >= 0) {
+        var title = $(this).text();
+        $(this).html('<input type="text" placeholder="Buscar ' + title + '" />');
+
+        $('input', this).on('keyup change', function () {
+          if (table.column(i).search() !== this.value) {
+            table
+              .column(i)
+              .search(this.value)
+              .draw();
+          }
+        });
+      }
+    });
+
+    var table = $('#dt').DataTable({
+      aLengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "Todos"]],
+      dom: 'Blfrtip',
+      buttons: ['copy', 'excel'],
+      orderCellsTop: true,
+      fixedHeader: true,
+      language: { "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json" },
+      "order": [[0, "asc"]]
+    });
+
+
+  });
+
+
+  function btn_exportar() {
+
+    $.ajax({
+      url: "/liberaciones_total_exportar/",
+      type: "GET",
+      success: function (response) {
+        Swal.fire("Archivo exportado");
+        a = "{{ url_for('static', filename='/downloads/') }}"
+        a = a + response;
+        document.getElementById("mlink_exportacion").innerText = response;
+        document.getElementById("mlink_exportacion").href = a;
+
+
+      }
+    });
+
+  }
+
+  // Permisos del sistema
+  {% if (session['nivel'] == 2) %}
+  $('td:nth-child(1),th:nth-child(1)').hide();
+  $('td:nth-child(2),th:nth-child(2)').hide();
+  $('#btn_agregar').hide();
+  $('#btn_exportar').hide();
+  {% endif %}
+
+
+
+</script>
+
+
+
+{% endblock %}

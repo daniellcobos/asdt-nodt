@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+<div class="alert alert-primary" role="alert">
+  <h2>Editar Clientes</h2>
+</div>
+
+<div class="container">
+  
+  <div class="row">
+    <div class="col-sm-2">Id Cliente</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="idcliente" name="idcliente" value="{{ data[0][0]}}" readonly></div>
+  </div> 
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">Cliente</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="cliente" name="cliente" value="{{ data[0][1]}}"></div>
+  </div>
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">Id Veeva</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="idveeva" name="idveeva" value="{{ data[0][4]}}"></div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-sm-2">Consultor</div>
+    <div class="col-sm-6">
+      <select id="consultor"  class="selectpicker show-tick" data-width="100%" data-live-search="true" >
+        <option data-divider="true"></option> 
+        {% for row in consultores: %}
+            <option value='{{ row[0] }}'>{{ row[0] }} | {{ row[1] }} </option> 
+        {% endfor %}                                   
+      </select>       
+    </div>
+  </div> 
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">Pais</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="pais" name="pais" value="{{ session['pais'] }}" readonly></div>
+  </div>   
+  <br>  
+  <hr>
+  <td><button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Agregar Cliente" onclick="btn_guardar()">Guardar</button></td>
+  <td><a class="btn btn-primary" href="/clientes" role="button"  data-toggle="tooltip" data-placement="top">Volver</a></td>
+  <hr>   
+</div>  
+
+
+<script>
+
+// Trae los datos del registro actual
+$( document ).ready(function() {
+
+  $('#consultor').val('{{ data[0][2]}}');
+  $('#consultor').selectpicker('refresh');
+
+});
+
+
+function btn_guardar(){
+
+  // Obtiene los datos del formulario cliente_add
+  try {
+      var sel = document.getElementById("consultor");
+      var consultor= sel.options[sel.selectedIndex].text;
+      consultor = consultor.split('|');
+      consultor[0] = consultor[0].trim();
+      consultor[1] = consultor[1].trim();
+  }
+
+  catch{
+    Swal.fire('Debe llenar todos los datos campos!!!');
+    return
+
+  }
+
+  if ( $('#idcliente').val() == '' || $('#cliente').val() == '' || $('#idveeva').val() == '' || consultor[0] == ''  )
+    {
+      Swal.fire('Debe llenar todos los datos campos!!!');
+      return
+    }
+    
+  var row = {
+    idcliente: $('#idcliente').val(),
+    cliente: $('#cliente').val(),
+    idveeva: $('#idveeva').val(),
+    idconsultor: consultor[0],    
+    consultor: consultor[1],    
+    pais: $('#pais').val()
+  }
+
+  $.ajax({
+    url:"/clientes_edit_guardar",
+    type:"POST",
+    data: {row},
+    success: function(response){
+
+      Swal.fire(response);
+      
+    }
+
+  });
+
+}
+
+
+</script>
+
+
+
+{% endblock %}

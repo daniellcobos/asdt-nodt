@@ -1,0 +1,233 @@
+{% extends "layout.html" %}
+{% block title %}Acuerdos Detalle {% endblock %}
+{% block head %}
+
+{{ super() }}  
+
+{% endblock %}
+{% block content %}
+
+<div class="alert alert-primary" role="alert">
+    <h2>Revisar todos los Acuerdos</h2>
+</div>
+
+<hr>
+{% if session['nivel']  == -1 %}
+  <td><button type='button' class='btn btn-primary' data-toggle='tooltip' data-placement='top' title='Editar Selección' onclick='btn_editar()'><i class='fas fa-edit'></i></button></td>
+<a id = 'mlink_exportacion' href=""></a>
+{% endif %}
+
+<hr>
+
+<table id="dt" class="table table-striped table-bordered nowrap">
+    <thead>
+      <tr id="tableHead">
+        <th>Editar</th>
+        <th>Vigente</th>
+        <th>Aprobado</th>
+          <th>Archivos</th>
+        <th>% Descuento</th>
+        <th>Id Acuerdo</th>
+        <th>ID Consultor</th>
+        <th>Consultor</th>
+        <th>ID Cliente</th>
+        <th>Cliente</th>
+        <th>Cant. Mensual</th>
+        <th>Plazo</th>
+        <th>Unid. Totales</th>
+        <th>Banda</th>
+        <th>Freegoods</th>
+        <th>Año Inicio Acuerdo</th>
+        <th>Mes Inicio Acuerdo</th>
+        <th>Año Fin Acuerdo</th>
+        <th>Mes Fin Acuerdo</th>
+      </tr>
+      </thead>
+</table>
+ <script>
+    const precios = {{ precios| safe }}
+    console.log(precios)
+    const nombres = {{ nombres| safe }}
+    const aq = {{ aq|safe }}
+
+
+    //Adding to head of table
+   const tableHead = document.getElementById("tableHead")
+    for (const nombre of nombres){
+        const newTh = document.createElement("th")
+        newTh.innerText = nombre
+        tableHead.appendChild(newTh)
+    }
+
+
+
+    const determinarPrecio = (producto,mes,year) => {
+        const dateAcuerdo = new Date(year,mes-1)
+        const precios1 = precios.filter((precio) => precio[1] === producto)
+        const precios2 = precios1.filter((precio) =>  new Date(precio[3]) < dateAcuerdo  )
+
+
+        if (precios2.length > 0) {
+
+             return precios2[0][4]
+        }
+        else{
+            return "Sin precio valido"
+        }
+    }
+
+    const determinarTodosPrecios = (mes,year) =>{
+        const precios = []
+        for (let producto of nombres){
+
+            const precio = determinarPrecio(producto[0],mes,year)
+            precios.push(precio)
+        }
+        return precios
+    }
+
+
+ </script>
+  <script>
+
+    dt = [];
+
+    i = 1;
+    {% for row in data %}
+
+
+      mvigente = fnt_sino({{ row[15] }});   
+      maprobado = fnt_aprobado({{ row[26] }});   
+      mes_ini = fnt_tmes({{ row[5] }});   
+      mes_fin = fnt_tmes({{ row[13] }});  
+
+
+      {% if (session['nivel'] == -1) %}            
+     row = [
+          '<input type="checkbox" class="btn btn-light" data-toggle="tooltip" data-placement="top" title="Editar Acuerdo" id="row{{ row[0] }}" value = "{{ row[0] }}"> Editar</input>',
+          mvigente,maprobado,"<a href='constancia/{{ row[0] }}'>Subir Archivos ({{ aq[loop.index0]}})</a>",fnt_format_procentaje({{ row[25] }},0),'{{ row[0] }}','{{ row[1] }}','{{ row[2] }}','{{ row[3] }}','{{ row[4] }}','{{ row[8] }}','{{ row[9] }}','{{ row[10] }}' ,
+            '{{ row[11] }}', '{{ row[12] }}', '{{ row[6] }}', mes_ini,'{{ row[14] }}', mes_fin ];
+      {% else %}
+      row = [
+          'ND',
+          mvigente,maprobado,"<a href='constancia/{{ row[0] }}'>Subir Archivos ({{ aq[loop.index0]}})</a>",fnt_format_procentaje({{ row[25] }},0),'{{ row[0] }}','{{ row[1] }}','{{ row[2] }}','{{ row[3] }}','{{ row[4] }}','{{ row[8] }}','{{ row[9] }}','{{ row[10] }}' ,'{{ row[11] }}', '{{ row[12] }}', '{{ row[6] }}', mes_ini,'{{ row[14] }}', mes_fin ];
+      {% endif %}
+
+      i = i + 1;
+
+        for (p of determinarTodosPrecios({{row[5]}},{{ row[6] }})){
+            row.push(p)
+        }
+
+      dt.push(row);
+
+    {% endfor %}   
+    
+    $(document).ready(function() {
+
+        // Setup - add a text input to each footer cell
+        $('#dt thead tr').clone(true).appendTo( '#dt thead' );
+        $('#dt thead tr:eq(1) th').each( function (i) {
+          // La primera columna no tiene busqueda
+          if (i == 0) {
+            var title = $(this).text();
+              $(this).html( '<input type="checkbox" class="btn btn-light" data-toggle="tooltip" data-placement="top" title="Seleccionar Todo" onclick = "fnt_seleccion(this)"> Selección</input>' );
+          }
+          // coloca el filtro a las demas columnas
+          if (i > 0) {
+              var title = $(this).text();
+              $(this).html( '<input type="text" placeholder="Buscar '+title+'" />' );
+
+              $( 'input', this ).on( 'keyup change', function () {
+                  if ( table.column(i).search() !== this.value ) {
+                      table
+                          .column(i)
+                          .search( this.value )
+                          .draw();
+                  }
+              } );
+          }
+
+        });
+
+        var table = $('#dt').DataTable( {    
+        aLengthMenu: [ [10, 20, 50, 100, -1], [10, 20, 50, 100, "Todos"] ], 
+        dom: 'Blfrtip',
+        buttons: ['copy', 'excel'],                        
+        data : dt,         
+        orderCellsTop: true,
+        fixedHeader: true,
+        language: {"url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"},
+        "order": [[ 4, "desc" ]]
+        } );   
+        
+              
+    });
+
+
+    function fnt_seleccion(m){
+
+      estado = m.checked;
+      $("input:checkbox").each( 
+        function() {
+          $(this).prop("checked", estado);
+
+        });
+    }
+
+
+    function btn_editar(){
+
+      // Detecta los items con check = true
+      mregs =[];
+      $("input:checkbox:checked").each( 
+        function() {
+          registro = $(this).val();
+          mregs.push(registro);
+        }
+      );
+      
+
+      Swal.fire({
+        title: 'Editar Acuerdos',
+        html: `
+        <h3>Aprobado</h3>
+        <select name="aprobado" id="aprobado" class="swal2-input">
+            <option value= 0 >ND</option>
+            <option value= 1 >Si</option>
+            <option value= 2 >No</option>
+            <option value= 3 >Cancelado</option>
+        </select>
+        `,
+        confirmButtonText: 'Ok',
+        showCancelButton: true,
+        focusConfirm: false,
+        preConfirm: () => {
+          const mapro = Swal.getPopup().querySelector('#aprobado').value
+          if (!mapro) {
+            Swal.showValidationMessage(`Debe ingresar el dato de aprobado `)
+          }
+
+          $.ajax({
+            url:"/todosacuerdos_edit/",
+            type:"POST",
+            data: {mregs : mregs, mapro : mapro },
+            success: function(response){
+              Swal.fire(response);
+              window.location.href = '/todosacuerdos/';
+            }
+          });  
+        }
+      
+        }).then((result) => {
+        
+        });
+    };
+
+
+
+  </script> 
+    
+
+
+{% endblock %}

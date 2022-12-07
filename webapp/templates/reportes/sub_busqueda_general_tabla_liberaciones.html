@@ -1,0 +1,23 @@
+<script src= "{{ url_for('static', filename='js/formatos.js') }}" ></script>
+
+{% for row in dt %}
+    <tr>
+        <td>{{ row[3] }}</td>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[8] }}</td>
+        <td>{{ row[9] }}</td>
+        <td>{{ row[10] }}</td>
+        <td>{{ row[15] }}</td>
+        <td>{{ row[13] }}%</td>
+        <td>{{ row[16] }}</td>
+        <td>{{ row[17] }}</td>
+        <td>{{ row[18] }}</td>
+        <td>{{ row[19] }}</td>
+        <td>{{ row[20] }}</td>
+        <td>{{ row[21] }}</td>
+        <td>{{ row[22] }}</td>
+        <td>{{ row[23] }}</td>
+        <td>{{ row[24] }}</td>
+    </tr>
+{% endfor %}

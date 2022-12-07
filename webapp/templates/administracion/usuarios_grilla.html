@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+
+<div class="alert alert-primary" role="alert">
+    <h2>Usuarios del Sistema</h2>
+</div>
+
+{% if (session['nivel'] == -1) %}  
+<hr>
+<td><a class="btn btn-primary" href="/usuarios_add/{{ session['pais'] }}" role="button"  data-toggle="tooltip" data-placement="top" title="Agregar"><i class="fas fa-plus-circle"></i></a></td>
+<td><button type='button' class='btn btn-primary' data-toggle='tooltip' data-placement='top' title='Exportar a Excel' onclick='btn_exportar()'><i class='fa fa-file-excel'></i></button></td>
+<a id = 'mlink_exportacion' href=""></a>
+<hr>
+{% endif  %}   
+
+<table id="dt" class="table table-striped table-bordered nowrap">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Perfil</th>
+        <th>País</th>
+        <th>ID Usuario</th>
+        <th>Usuario</th>
+        <th>Email</th>
+        <th>Contraseña</th>
+      </tr>
+      </thead>
+  </table>
+
+<script>
+
+
+    // Llena el arreglo con la dt
+    dt = [];
+
+
+    {% for row in data: %}    
+      var p =  fnt_perfil({{ row[4] }});
+      row = [
+      "<a class='btn btn-light' href='/usuarios_edit/{{ row[0] }}' role='button'  data-toggle='tooltip' data-placement='top' title='Editar'><i class='fas fa-edit'></i></a><a class='btn btn-light' href='/usuarios_delete/{{ row[0] }}' role='button'  data-toggle='tooltip' data-placement='top' title='Editar'><i class='fas fa-trash'></i></a>",
+      p,'{{ row[5] }}','{{ row[0] }}','{{ row[1] }}','{{ row[2] }}','<p class="hidetext">{{ row[3] }}</p>'];
+      dt.push(row);
+    {% endfor %}
+
+    $(document).ready(function() {
+
+        // Setup - add a text input to each footer cell
+        $('#dt thead tr').clone(true).appendTo( '#dt thead' );
+        $('#dt thead tr:eq(1) th').each( function (i) {
+          // coloca el filtro a las demas columnas
+          if (i >= 0) {
+              var title = $(this).text();
+              $(this).html( '<input type="text" placeholder="Buscar '+title+'" />' );
+
+              $( 'input', this ).on( 'keyup change', function () {
+                  if ( table.column(i).search() !== this.value ) {
+                      table
+                          .column(i)
+                          .search( this.value )
+                          .draw();
+                  }
+              } );
+          }
+        });
+
+        var table = $('#dt').DataTable( {     
+        data : dt,
+        orderCellsTop: true,
+        fixedHeader: true,
+        language: {"url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"},
+        "order": [[ 5, "asc" ]]      
+        } );    
+
+                    
+
+    });
+
+    function btn_exportar(){
+
+      $.ajax({
+            url:"/usuarios_exportar/",
+            type:"GET",
+            success: function(response){
+              Swal.fire("Archivo exportado");
+              a = "{{ url_for('static', filename='/downloads/') }}"
+              a = a + response;
+              document.getElementById("mlink_exportacion").innerText = response; 
+              document.getElementById("mlink_exportacion"). href= a;
+
+
+            }
+          });       
+
+      }    
+
+
+  </script>  
+
+
+
+{% endblock %}

@@ -1,0 +1,564 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+
+<div class="alert alert-primary" role="alert">
+    <h2>Editar Acuerdo</h2>
+</div>
+
+<hr>
+
+<div class="container">
+  <div class="col-sm-4">{{ registro[1] }}</div>
+  <!-- Control the column width, and how they should appear on different devices -->
+  <div class="row">
+    <div class="col-sm-2">ID Consultor</div>
+    <div class="col-sm-4">{{ registro[1] }}</div>
+    <div class="col-sm-2">Plazo</div>
+    <div class="col-sm-4">
+      <select id="mplazo"  class="selectpicker show-tick" data-live-search="true"   onchange ="consulta_plazos()">
+        <option data-divider="true"></option> 
+          {% for row in plazos: %}            
+            <option value='{{ row[1] }}'>{{ row[0] }}</option> 
+          {% endfor %}              
+        </select>  
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-2">Consultor</div>
+      {% if session['nivel'] == 1 %}
+      i=1
+      <div class="col-sm-4">{{ registro[2] }}</div>      
+    {% else %}                
+      <select id="consultor" class="selectpicker show-tick col-sm-4" data-width="100%" data-live-search="true" >
+        <option data-divider="true"></option> 
+        {% for row in consultores: %}
+          <option value='{{ row[0] }}'>{{ row[0] }} | {{ row[1] }} </option> 
+        {% endfor %}                                   
+      </select>         
+    {% endif %}                                      
+    <div class="col-sm-2">Banda</div>
+    <div class="col-sm-4">
+      <select id="mbanda"  class="selectpicker show-tick" data-live-search="true"  onchange ="consulta_banda()" >
+        <option data-divider="true"></option> 
+      </select>
+    </div>    
+  </div>  
+
+  <div class="row">
+    <div class="col-sm-2">Pais</div>
+    <div class="col-sm-4">{{ registro[16] }}</div>    
+    <div class="col-sm-2">Cant. Mensual</div>
+    <div class="col-sm-4"><input type="text" class="form-control" id="cantidad_mes" name="cantidad_mes" onchange="consulta_totales()"></div>    
+  </div>  
+
+  <div class="row">
+    <div class="col-sm-2">Cliente</div>
+    <div class="col-sm-4">
+      <select id="cliente"  class="selectpicker show-tick" data-width="100%" data-live-search="true" >
+        <option data-divider="true"></option> 
+        {% for row in clientes: %}
+            <option value='{{ row[0] }}'>{{ row[0] }} | {{ row[1] }} </option> 
+        {% endfor %}                                   
+      </select>       
+    </div>
+    <div class="col-sm-2">Unidades Totales</div>
+    <div class="col-sm-4"><input type="text" class="form-control" id="unidades_total" name="unidades_total" readonly></div>        
+  </div>   
+  
+  <div class="row">
+    <div class="col-sm-2">Id Acuerdo</div>
+    <div class="col-sm-4"><input type="text" class="form-control" id="idacuerdo" name="idacuerdo" readonly></div>
+    <div class="col-sm-2">Freegoods</div>
+    <div class="col-sm-4"><input type="text" class="form-control" id="freegoods" name="freegoods" readonly></div>
+  </div>   
+
+  <div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-4"></div>
+  </div>     
+
+  <div class="row">
+    <div class="col-sm-2">Año Inicio Acuerdo</div>
+    <div class="col-sm-4">
+      <select id="maño_inicio"  class="selectpicker show-tick" data-live-search="true"  onchange ="calcular_idacuerdo()">
+        <option data-divider="true"></option> 
+        {% if session['nivel'] == 1 %}
+          i=1
+          #Aqui van los deshabilidos
+          <option disabled>2021</option>           
+        {% else %}          
+          <option>2021</option>           
+        {% endif %}                                  
+          <option>2022</option> 
+          <option>2023</option> 
+          <option>2024</option> 
+          <option>2025</option> 
+      </select>       
+    </div>
+    <div class="col-sm-2">Año Fin Acuerdo</div>
+    <div class="col-sm-4">
+      <select id="maño_fin"  class="selectpicker show-tick" data-live-search="true"  onchange ="consulta_intervalo()" disabled>
+        <option data-divider="true"></option> 
+            <option>2021</option> 
+            <option>2022</option> 
+            <option>2023</option> 
+            <option>2024</option> 
+            <option>2025</option> 
+      </select>       
+    </div>    
+  </div>   
+
+  <div class="row">
+    <div class="col-sm-2">Mes Inicio Acuerdo</div>
+    <div class="col-sm-4">
+      <select id="mmes_inicio"  class="selectpicker show-tick" data-live-search="true"  onchange ="consulta_intervalo()">
+        <option data-divider="true"></option> 
+        {% if session['nivel'] == 1 %}
+            i =1
+        {% else %}          
+            i =2
+        {% endif %}   
+            <option value="01" >Enero</option> 
+            <option value="02" >Febrero</option> 
+            <option value="03" >Marzo</option> 
+            <option value="04">Abril</option> 
+            <option value="05">Mayo</option> 
+            <option value="06">Junio</option> 
+            <option value="07">Julio</option> 
+            <option value="08">Agosto</option> 
+            <option value="09">Septiembre</option> 
+            <option value="10">Octubre</option> 
+            <option value="11">Noviembre</option> 
+            <option value="12">Diciembre</option> 
+      </select>       
+    </div>
+    <div class="col-sm-2">Mes Fin Acuerdo</div>
+    <div class="col-sm-4">
+      <select id="mmes_fin"  class="selectpicker show-tick" data-live-search="true"  disabled>
+        <option data-divider="true"></option> 
+            <option value="01">Enero</option> 
+            <option value="02">Febrero</option> 
+            <option value="03">Marzo</option> 
+            <option value="04">Abril</option> 
+            <option value="05">Mayo</option> 
+            <option value="06">Junio</option> 
+            <option value="07">Julio</option> 
+            <option value="08">Agosto</option> 
+            <option value="09">Septiembre</option> 
+            <option value="10">Octubre</option> 
+            <option value="11">Noviembre</option> 
+            <option value="12">Diciembre</option> 
+      </select>         
+    </div>    
+</div>
+
+<hr>
+<div class="row">
+  <div class="col-sm-2">Aprobación Nivel 1: Gerente de Distrito </div>  
+  <div class="col-sm-2">
+    <select id="aprobacion10"  class="selectpicker show-tick" data-width="fit" >
+      <option data-divider="true"></option> 
+          <option value=0>ND</option> 
+          <option value=1>Si</option> 
+          <option value=2>No</option> 
+    </select> 
+</div>  
+<div class="col-sm-2">Aprobación Nivel 2: Business Unit Head </div>  
+<div class="col-sm-2">
+  <select id="aprobacion11"  class="selectpicker show-tick" data-width="fit" >
+    <option data-divider="true"></option> 
+        <option value=0>ND</option> 
+        <option value=1>Si</option> 
+        <option value=2>No</option> 
+  </select> 
+</div> 
+<div class="col-sm-2">Aprobación Nivel 3: Area Financiera </div>  
+<div class="col-sm-2">
+  <select id="aprobacion12"  class="selectpicker show-tick " data-width="fit" >
+    <option data-divider="true"></option> 
+        <option value=0>ND</option> 
+        <option value=1>Si</option> 
+        <option value=2>No</option> 
+  </select> 
+</div> 
+</div>
+
+  
+
+<br>  
+<hr>
+<td><button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Agregar Guardar" onclick="btn_guardar()">Guardar</button></td>
+<!--<td><a class="btn btn-primary" href="/acuerdosdetalle/{{ registro[1] }}/{{ registro[2] }}/{{ registro[16] }}" role="button"  data-toggle="tooltip" data-placement="top" title="Agregar Acuerdo">Volver</a></td> -->
+<hr>
+
+<!-- Campos ocultos para editar los parametros. -->
+<input type="hidden" value="{{ registro[2] }}"><br>
+<input type="hidden" value="{{ registro[24] }}"><br>
+
+
+  <script>
+
+  // Vectores
+  bandas = [];
+  mporcentaje = 0;
+  {% for row in freegoods: %}
+    var row = {Banda: '{{ row[2] }}', Id : {{ row[0] }} , Plazo: '{{ row[6] }}', Resumen: '{{ row[9] }}', Minimo : {{ row[3] }}, Maximo : {{ row[4] }}  , Meses : {{ row[5] }} , Regla: '{{ row[10] }}' , descuento : {{ row[7]}} };
+    bandas.push(row);
+  {% endfor %}  
+    console.log(bandas)
+  
+
+
+    // Trae los datos del registro actual
+    $( document ).ready(function() {
+        $('#idacuerdo').val('{{ registro[0] }}');
+        $('#consultor').val('{{ registro[1] }}');
+        $('#consultor').selectpicker('refresh');
+        $('#cliente').val('{{ registro[3] }}');
+        $('#cliente').selectpicker('refresh');
+        $('#maño_inicio').val('{{ registro[6] }}');
+        $('#maño_inicio').selectpicker('refresh');
+        mmes_ini =  '{{ registro[5] }}' ;
+        if (mmes_ini < 10) 
+        {
+            mmes_ini = "0" + mmes_ini;
+        };
+        $('#mmes_inicio').val(mmes_ini);
+        $('#mmes_inicio').change();
+        $('#mplazo').val('{{ registro[9] }}');
+        $('#mplazo').change();                                
+        $('#mbanda').val('{{ registro[11] }}');
+        $('#mbanda').change();
+        $('#cantidad_mes').val('{{ registro[8] }}');
+        $('#unidades_total').val('{{ registro[10] }}');
+        $('#freegoods').val('{{ registro[12] }}');
+        // Flujo de aprobacion
+        $('#aprobacion10').val('{{ registro[27] }}');
+        $('#aprobacion10').selectpicker('refresh');
+        $('#aprobacion11').val('{{ registro[28] }}');
+        $('#aprobacion11').selectpicker('refresh');
+        $('#aprobacion12').val('{{ registro[29] }}');
+        $('#aprobacion12').selectpicker('refresh');
+
+        // Deshabilita el flujo
+        $('#aprobacion10').prop('disabled', 'disabled');
+        $('#aprobacion10').selectpicker('refresh');
+        $('#aprobacion11').prop('disabled', 'disabled');
+        $('#aprobacion11').selectpicker('refresh');
+        $('#aprobacion12').prop('disabled', 'disabled');
+        $('#aprobacion12').selectpicker('refresh');
+
+        // Habilita el fijo segun el perfil
+        if ( {{ session['nivel'] }} == 10)
+        {
+          $('#aprobacion10').removeAttr('disabled');
+          $('#aprobacion10').selectpicker('refresh');
+        }
+        if ( {{ session['nivel'] }} == 11)
+        {
+          $('#aprobacion11').removeAttr('disabled');
+          $('#aprobacion11').selectpicker('refresh');
+        }
+        if ( {{ session['nivel'] }} == 12)
+        {
+          $('#aprobacion12').removeAttr('disabled');
+          $('#aprobacion12').selectpicker('refresh');
+        }
+        
+    })
+
+
+  function calcular_idacuerdo(){
+
+      var mkey = '';
+    // Obtiene el año
+    var sel = document.getElementById("maño_inicio");
+    var año= sel.options[sel.selectedIndex].text;
+
+    for (i = 0; i < idmax.length; i++) {
+
+      if (año == idmax[i].Periodo)
+      {
+        mkey = idmax[i].Id + 1;
+        mkey = '{{ pais }}' + "-"  + mkey ;
+        
+      }
+
+    }
+    if (mkey == '')
+    {
+      mkey = año  + '0001' ;
+      mkey = '{{ pais }}' + "-"  + mkey ; 
+    }
+
+    document.getElementById("idacuerdo").value = mkey ;
+    consulta_intervalo();
+
+  }
+
+  function auditioria(){
+    $('#aprobacion10').val('0');
+    $('#aprobacion10').selectpicker('refresh');
+    $('#aprobacion11').val('0');  
+    $('#aprobacion11').selectpicker('refresh');
+    $('#aprobacion12').val('0');
+    $('#aprobacion12').selectpicker('refresh');
+  }
+
+  function consulta_plazos() {
+
+    auditioria();
+
+    // Borra los elementos actuales
+    document.getElementById("mbanda").innerHTML = "";
+    $('#mbanda').selectpicker('refresh');
+    
+    // Obtiene el plazo
+    var sel = document.getElementById("mplazo");
+    var mplazo= sel.options[sel.selectedIndex].text;
+
+    $('#mbanda').append($('<option data-divider="true"></option>'));
+    for (i = 0; i < bandas.length; i++) {
+      if (bandas[i].Plazo == mplazo ){
+        mvalor = bandas[i].Id;
+        mtexto = bandas[i].Banda + ': de ' + bandas[i].Resumen;
+        $('#mbanda').append($('<option>', {value:mvalor, text: mtexto}));
+      }
+    }
+    // Limpia los valores
+    $('#mbanda').selectpicker('refresh');
+    document.getElementById("cantidad_mes").value = '';
+    document.getElementById("unidades_total").value = '';
+    document.getElementById("freegoods").value = '';
+
+    consulta_intervalo();
+
+  }
+
+
+  function consulta_banda(){
+
+    auditioria();
+
+    // Obtiene la banda
+    var sel = document.getElementById("mbanda");
+    var Id= sel.options[sel.selectedIndex].value;
+
+    for (i = 0; i < bandas.length; i++) {
+      if (bandas[i].Id == Id ){
+        document.getElementById("cantidad_mes").value = bandas[i].Minimo ;
+        document.getElementById("unidades_total").value = bandas[i].Minimo * bandas[i].Meses ;
+        calcular_fregoods(i);
+      }
+    }
+
+  }
+
+  function consulta_totales(){
+
+    auditioria();
+
+    // Obtiene la banda
+    var sel = document.getElementById("mbanda");
+    var Id= sel.options[sel.selectedIndex].value;
+
+    for (i = 0; i < bandas.length; i++) {
+      if (bandas[i].Id == Id ){
+        m = document.getElementById("cantidad_mes").value  ;
+        mtotal = m ;
+        // Verifica que este entre los limites
+        if ( mtotal >= bandas[i].Minimo && mtotal <= bandas[i].Maximo )
+        {
+          document.getElementById("unidades_total").value = m * bandas[i].Meses ;
+        }
+        else
+        {
+          Swal.fire('Unidades fuera del rango. Se pondra el minimo');
+          document.getElementById("cantidad_mes").value = bandas[i].Minimo ;
+          document.getElementById("unidades_total").value = bandas[i].Minimo * bandas[i].Meses;
+        }
+        calcular_fregoods(i);
+        break;
+
+      }
+    }    
+
+  }
+
+
+  function calcular_fregoods(i){
+
+    auditioria();
+
+    // Calcula los freegoods
+    mdescuento = bandas[i].descuento;
+    var mregla = bandas[i].Regla;
+    var n = mregla.search("%");
+    // Si es % calcula el valor si es 1/6 calcula el modulo
+    if (n > 0)
+    {
+      mporcentaje =mregla.replace("%","");
+
+      document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value * (mporcentaje/100));
+      
+    }
+    else
+    {      
+      mporcentaje = 17;
+      document.getElementById("freegoods").value = parseInt(document.getElementById("unidades_total").value / 6);
+    }
+    console.log(mporcentaje);
+
+  }
+
+  function consulta_intervalo(){
+
+    auditioria();
+
+    var sel = document.getElementById("maño_inicio");
+    var maño = sel.options[sel.selectedIndex].value;
+
+    var sel = document.getElementById("mmes_inicio");
+    var mmes = sel.options[sel.selectedIndex].value;
+
+    var sel = document.getElementById("mplazo");
+    var mplazo= sel.options[sel.selectedIndex].value;
+    mplazo = mplazo - 1;
+
+    mfecha = maño + "/" + mmes + "/01" ;
+    mfin = moment(mfecha, 'YYYY/MM/DD').add('month', mplazo);
+    mfin = mfin.format('YYYY/MM/DD');
+
+    var añofin = moment(moment(mfin).format("YYYY/MM/DD")).format('YYYY');
+    var mesfin = moment(moment(mfin).format("YYYY/MM/DD")).format('M');
+
+
+    if (mesfin<10){
+      mesfin = "0" + mesfin;
+    }
+      
+
+
+    $('#maño_fin').selectpicker('val', [añofin]);
+    $('#maño_fin').selectpicker('refresh');
+
+    $('#mmes_fin').selectpicker('val', [ mesfin]);
+    $('#mmes').selectpicker('refresh');
+
+  }
+
+  function addDays(date, days) {
+    const copy = new Date(Number(date));
+    copy.setDate(date.getDate() + days);
+    return copy
+  }
+
+
+
+  function btn_guardar(){
+
+    // Obtiene los datos del formulario acuerdo_add
+    try {
+      var sel = document.getElementById("cliente");
+      var cliente= sel.options[sel.selectedIndex].text;
+      cliente = cliente.split('|');
+      cliente[0] = cliente[0].trim();
+      cliente[1] = cliente[1].trim();
+
+      var sel = document.getElementById("consultor");
+      var consultor= sel.options[sel.selectedIndex].text;
+      consultor = consultor.split('|');
+      consultor[0] = consultor[0].trim();
+      consultor[1] = consultor[1].trim();      
+
+      var sel = document.getElementById("maño_inicio");
+      var maño_inicio = parseInt(sel.options[sel.selectedIndex].text);
+
+      var sel = document.getElementById("mmes_inicio");
+      var mmes_inicio = parseInt(sel.options[sel.selectedIndex].value);
+
+      var sel = document.getElementById("mplazo");
+      var mplazo = parseInt(sel.options[sel.selectedIndex].value);
+
+      var sel = document.getElementById("mbanda");
+      var mbanda = sel.options[sel.selectedIndex].value;
+
+      var sel = document.getElementById("maño_fin");
+      var maño_fin = parseInt(sel.options[sel.selectedIndex].text);
+
+      var sel = document.getElementById("mmes_fin");
+      var mmes_fin = parseInt(sel.options[sel.selectedIndex].value);    
+    }
+    catch{
+      Swal.fire('Debe llenar todos los datos del acuerdo!!!');
+      return
+
+    }
+
+
+    if (cliente[0] == ''  || $('#idacuerdo').val() == '' || maño_inicio == '' || mmes_inicio == '' || isNaN(mplazo)  || isNaN(mbanda) )
+    {
+      Swal.fire('Debe llenar todos los datos del acuerdo!!!');
+      return
+    }
+
+
+    var row = {
+      idacuerdo: $('#idacuerdo').val(),
+      idconsultor: consultor[0],
+      consultor: consultor[1],
+      idcliente: cliente[0],
+      cliente: cliente[1],
+      mes_ini:mmes_inicio,
+      ano_ini:maño_inicio,
+      tipo_acuerdo:'Regular',
+      cantidad_periodo:$('#cantidad_mes').val(), 
+      duracion:mplazo,
+      unidades_total:$('#unidades_total').val(), 
+      banda:mbanda,
+      freegoods:$('#freegoods').val(),
+      mes_fin:mmes_fin,
+      ano_fin:maño_fin,
+      vigente:0,
+      pais:'{{ pais }}',
+      num_entregas:0,
+      num_entregas_cierre:0,
+      anulado:0,
+      entrega_x_porcentaje:0,
+      porc_piso_entrega:0,
+      porc_cumplimiento:0,
+      fgs_sobre_cien:mporcentaje,
+      porc_descuento:mdescuento,
+      aprobado:0,
+      aprobacion10:$('#aprobacion10').val(),  
+      aprobacion11:$('#aprobacion11').val(),  
+      aprobacion12:$('#aprobacion12').val()
+    };
+
+
+    $.ajax({
+    url:"/acuerdos_editar_salvar",
+    type:"POST",
+    data: {row},
+    success: function(response){
+
+      Swal.fire(response);
+      
+    }
+  
+
+  });
+
+}
+
+  </script>  
+
+{% endblock %}

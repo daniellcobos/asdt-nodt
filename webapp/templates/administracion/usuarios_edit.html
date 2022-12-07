@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+<div class="alert alert-primary" role="alert">
+  <h2>Editar Usuario</h2>
+</div>
+
+<div class="container">
+  
+  <div class="row">
+    <div class="col-sm-2">Perfil</div>
+
+    <div class="col-sm-6">
+      {% if (session['nivel'] == -1) %}
+      <select id="perfil"  class="selectpicker show-tick" data-width="100%" data-live-search="true" >
+        {% else %}
+        <select id="perfil"  class="selectpicker show-tick" data-width="100%" data-live-search="true" disabled>
+        {% endif  %} 
+        <option value= -1 > Admin de País </option>                                        
+        <option value= 1 > Consultor </option>  
+        <option value= 2 > Servicio al Cliente </option>  
+        <option value= 10 > Gerente de Ventas </option>                                                              
+        <option value= 11 > Director </option>                                                              
+        <option value= 12 > Finanzas </option>                                                              
+      </select>  
+    </div>
+  </div> 
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">Pais</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="pais" name="pais" value="{{ data[5] }}" readonly></div>
+  </div>
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">Id Usuario</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="idusuario" name="idusuario" value="{{ data[0] }}" readonly></div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-sm-2">Usuario</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="usuario" name="usuario" value="{{ data[1] }}"></div>
+  </div> 
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">e-mail</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="email" name="email" value="{{ data[2] }}" ></div>
+  </div>   
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">Password</div>
+    <div class="col-sm-6"><input type="text" class="form-control hidetext" id="password" name="password" value="{{ data[3] }}" ></div>
+  </div>   
+  <hr>
+  <td><button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Agregar Cliente" onclick="btn_guardar()">Guardar</button></td>
+  <td><a class="btn btn-primary" href="/usuarios_grilla" role="button"  data-toggle="tooltip" data-placement="top">Volver</a></td>
+  <hr>   
+</div>  
+
+  <script>
+
+  // Trae los datos del registro actual
+  $( document ).ready(function() {
+
+  $('#perfil').val('{{ data[4]}}');
+  $('#perfil').selectpicker('refresh');
+
+  });
+
+  function btn_guardar(){
+
+  // Obtiene los datos del formulario add
+
+  if ( $('#idusuario').val() == '' || $('#usuario').val() == '' || $('#email').val() == '' || $('#password').val() == ''  )
+    {
+      Swal.fire('Debe llenar todos los datos!!!');
+      return
+    }
+    
+  var row = {
+    perfil: $('#perfil').val(),
+    pais: $('#pais').val(),
+    idusuario: $('#idusuario').val(),
+    usuario: $('#usuario').val(),
+    email: $('#email').val(),
+    password: $('#password').val()  
+  };
+
+
+  $.ajax({
+    url:"/usuarios_actualizar",
+    type:"POST",
+    data: row,
+    success: function(response){
+
+      Swal.fire(response);
+      
+    }
+
+  });
+
+  }
+ 
+  </script>  
+
+{% endblock %}

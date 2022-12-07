@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+
+<div class="alert alert-primary" role="alert">
+    <h2>Opciones del Sistema</h2>
+</div>
+
+<hr>
+
+
+<button type="button" class="btn btn-primary" onclick="btn_borrar_liberaciones()" >Borrar Liberaciones Vigentes</button>
+<br>
+<br>
+<button type="button" class="btn btn-primary" onclick="btn_crear_liberaciones()" >Crear Liberaciones Vigentes</button>
+<br>
+<br>
+<button type="button" class="btn btn-primary" onclick="btn_consolidar()" >Consolidar Liberaciones Vigentes</button>
+<hr>
+<div id="placeholder" style="display:none ;"><div class="lds-ripple"><div></div><div></div></div></div>
+  <script>
+ const placeholder= document.getElementById("placeholder")
+
+    function btn_borrar_liberaciones(){
+
+      Swal.fire({
+            title: '¿Esta seguro?',
+            text: "No podra revertir esta operacion",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, borrar liberaciones vigentes'
+          }).then((result) => {
+         
+            if (result.isConfirmed) {
+             
+              $.ajax({
+                url:"/borrar_liberaciones/",
+                type:"POST",
+                success: function(response){
+                 
+                  Swal.fire(response);
+
+                }
+
+              });     
+
+            }
+          })      
+
+      }
+
+    function btn_crear_liberaciones(){
+
+        Swal.fire({
+              title: '¿Esta seguro?',
+              text: "No podra revertir esta operacion",
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'Si, crear liberaciones vigentes'
+            }).then((result) => {
+              if (result.isConfirmed) {
+
+                $.ajax({
+                  url:"/crear_liberaciones/",
+                  type:"POST",
+                  success: function(response){
+
+                    Swal.fire(response);
+
+                  }
+
+                });     
+
+              }
+            })      
+
+      }
+
+    function btn_consolidar(){
+
+      Swal.fire({
+            title: '¿Esta seguro?',
+            text: "No podra revertir esta operacion",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, consolidar'
+          }).then((result) => {
+            console.log(placeholder)
+              placeholder.style.display = "inline"
+            if (result.isConfirmed) {
+
+              $.ajax({
+                url:"/consolidar/",
+                type:"POST",
+                success: function(response){
+                  placeholder.style.display = "none"
+                  console.log(response)
+                  Swal.fire(response);
+
+                }
+
+              });     
+
+            }
+          })      
+
+    }
+
+
+
+
+
+
+  </script>  
+
+
+
+{% endblock %}

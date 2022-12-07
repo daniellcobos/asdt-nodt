@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+
+
+{{ super() }}
+{% endblock %}
+{% block content %}
+
+
+<div class="container" id="maincon">
+<h4> Subir Archivos</h4>
+<form action="subirconstancia/{{ idacuerdo }}" method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+<hr>
+<h4>Lista de Archivos</h4>
+<hr>
+<table class="table">
+    <thead>
+    <tr>
+        <th> Archivo </th>
+        <th> Tamaño </th>
+        <th> Accion </th>
+        <th> Fecha Subida </th>
+    </tr>
+    </thead>
+    <tbody id="tbody">
+
+    </tbody>
+</table>
+</div>
+
+<script>
+const file = {{ file|safe }}
+
+
+const maincon = document.getElementById("tbody")
+
+
+for (let f of file){
+    const tr = document.createElement("tr")
+    const td1 = document.createElement("td")
+    const td2 = document.createElement("td")
+    const td3 = document.createElement("td")
+    const td4= document.createElement("td")
+    const aborrar = document.createElement("a")
+    const archivo = document.createElement("a")
+    aborrar.innerHTML = "<i class='fas fa-trash'><i>"
+    aborrar.href = "/borrar/download/{{ idacuerdo }}/" + f[0]
+
+    archivo.innerText = f[0]
+    archivo.href = "/download/{{ idacuerdo }}/" + f[0]
+    td1.appendChild(archivo)
+    td2.innerHTML ="<p>"+ f[1] +" kB </p>"
+    td3.appendChild(aborrar)
+    td4.innerHTML = "<p>"+ f[2] +"</p>"
+    tr.appendChild(td1)
+    tr.appendChild(td2)
+    tr.appendChild(td3)
+    tr.appendChild(td4)
+    maincon.appendChild(tr)
+
+}
+</script>
+{% endblock %}

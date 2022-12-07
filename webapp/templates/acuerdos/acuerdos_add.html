@@ -1,0 +1,452 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+
+<div class="alert alert-primary" role="alert">
+    <h2>Agregar Acuerdo</h2>
+</div>
+
+<hr>
+
+<div class="container">
+  <!-- Control the column width, and how they should appear on different devices -->
+  <div class="row">
+    <div class="col-sm-2">ID Consultor</div>
+    <div class="col-sm-4">{{ idconsultor }}</div>
+    <div class="col-sm-2">Plazo</div>
+    <div class="col-sm-4">
+      <select id="mplazo"  class="selectpicker show-tick" data-live-search="true"   onchange ="consulta_plazos()">
+        <option data-divider="true"></option> 
+          {% for row in plazos: %}            
+            <option value='{{ row[1] }}'>{{ row[0] }}</option> 
+          {% endfor %}              
+        </select>  
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-2">Consultor</div>
+    <div class="col-sm-4">{{ usuario }}</div>
+    <div class="col-sm-2">Banda</div>
+    <div class="col-sm-4">
+      <select id="mbanda"  class="selectpicker show-tick" data-live-search="true"  onchange ="consulta_banda()" >
+        <option data-divider="true"></option> 
+      </select>
+    </div>    
+  </div>  
+
+  <div class="row">
+    <div class="col-sm-2">Pais</div>
+    <div class="col-sm-4">{{ pais }}</div>    
+    <div class="col-sm-2">Cant. Mensual</div>
+    <div class="col-sm-4"><input type="text" class="form-control" id="cantidad_mes" name="cantidad_mes" onchange="consulta_totales()"></div>    
+  </div>  
+
+  <div class="row">
+    <div class="col-sm-2">Cliente</div>
+    <div class="col-sm-4">
+      <select id="cliente"  class="selectpicker show-tick" data-width="100%" data-live-search="true" >
+        <option data-divider="true"></option> 
+        {% for row in clientes: %}
+            <option value='{{ row[0] }}'>{{ row[0] }} | {{ row[1] }} </option> 
+        {% endfor %}                                   
+      </select>       
+    </div>
+    <div class="col-sm-2">Unidades Totales</div>
+    <div class="col-sm-4"><input type="text" class="form-control" id="unidades_total" name="unidades_total" readonly></div>        
+  </div>   
+  
+  <div class="row">
+    <div class="col-sm-2">Id Acuerdo</div>
+    <div class="col-sm-4"><input type="text" class="form-control" id="idacuerdo" name="idacuerdo" readonly></div>
+    <div class="col-sm-2">Freegoods</div>
+    <div class="col-sm-4"><input type="text" class="form-control" id="freegoods" name="freegoods" readonly></div>
+  </div>   
+
+  <div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-4"></div>
+  </div>     
+
+  <div class="row">
+    <div class="col-sm-2">Año Inicio Acuerdo</div>
+    <div class="col-sm-4">
+      <select id="maño_inicio"  class="selectpicker show-tick" data-live-search="true"  onchange ="calcular_idacuerdo()">
+        <option data-divider="true"></option> 
+        {% if session['nivel'] == 1 %}
+          i=1
+          #Aqui van los deshabilidos
+          <option disabled>2021</option>           
+        {% else %}          
+          <option>2021</option>           
+        {% endif %}                                  
+          <option>2022</option> 
+          <option>2023</option> 
+          <option>2024</option> 
+          <option>2025</option> 
+      </select>       
+    </div>
+    <div class="col-sm-2">Año Fin Acuerdo</div>
+    <div class="col-sm-4">
+      <select id="maño_fin"  class="selectpicker show-tick" data-live-search="true"  onchange ="consulta_intervalo()" disabled>
+        <option data-divider="true"></option> 
+          <option>2021</option>                      
+          <option>2022</option> 
+          <option>2023</option> 
+          <option>2024</option> 
+          <option>2025</option> 
+      </select>       
+    </div>    
+  </div>   
+
+  <div class="row">
+    <div class="col-sm-2">Mes Inicio Acuerdo</div>
+    <div class="col-sm-4">
+      <select id="mmes_inicio"  class="selectpicker show-tick" data-live-search="true"  onchange ="consulta_intervalo()">
+        <option data-divider="true"></option> 
+       
+  </select>       
+    </div>
+    <div class="col-sm-2">Mes Fin Acuerdo</div>
+    <div class="col-sm-4">
+      <select id="mmes_fin"  class="selectpicker show-tick" data-live-search="true"  disabled>
+        <option data-divider="true"></option> 
+            <option value="01">Enero</option> 
+            <option value="02">Febrero</option> 
+            <option value="03">Marzo</option> 
+            <option value="04">Abril</option> 
+            <option value="05">Mayo</option> 
+            <option value="06">Junio</option> 
+            <option value="07">Julio</option> 
+            <option value="08">Agosto</option> 
+            <option value="09">Septiembre</option> 
+            <option value="10">Octubre</option> 
+            <option value="11">Noviembre</option> 
+            <option value="12">Diciembre</option> 
+      </select>       
+    </div>
+  </div>    
+
+<br>  
+<hr>
+<td><button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Agregar Guardar" onclick="btn_guardar()">Guardar</button></td>
+<!-- <td><a class="btn btn-primary" href="/acuerdosdetalle/{{ idconsultor }}/{{ usuario }}/{{ pais }}" role="button"  data-toggle="tooltip" data-placement="top">Volver</a></td> -->
+<hr>
+<script>
+  const nivel = "{{session['nivel']|safe}}";
+  const pais = "{{session['pais']|safe}}"
+  const currentMonth = new Date().getMonth() + 1
+  const mesPicker = document.getElementById('mmes_inicio')
+  const meses = [["01","Enero"],["02","Febrero"],["03","Marzo"],["04","Abril"],["05","Mayo"],
+                ["06","Junio"],["07","Julio"],["08","Agosto"],["09","Septiembre"],["10","Octubre"],["11","Noviembre"],["12","Diciembre"]]
+
+  for (mes of meses){
+    console.log(mes)
+    const mvalue = mes[0]
+    const mtext = mes[1]
+    const option = document.createElement('option')
+    option.value = mvalue
+    option.innerText = mtext
+    if (nivel == 1 & pais != 'CL'){
+      if (mvalue < currentMonth){
+        option.disabled = true
+      }
+    }
+    mesPicker.appendChild(option)
+
+  }
+
+</script>
+
+  <script>
+
+  // Vectores
+  idmax = [];
+  mdescuento = 0; 
+
+  {% for row in id_max: %}
+    var row = {Id : {{ row[0] }} };
+    idmax.push(row);    
+  {% endfor %}
+
+
+  bandas = [];
+
+  {% for row in freegoods: %}
+    var row = {Banda: '{{ row[2] }}', Id : {{ row[0] }} , Plazo: '{{ row[6] }}', Resumen: '{{ row[9] }}', Minimo : {{ row[3] }}, Maximo : {{ row[4] }}  , Meses : {{ row[5] }} , Regla: '{{ row[10] }}', descuento : {{ row[7]}} };
+    bandas.push(row);    
+  {% endfor %}  
+
+  function calcular_idacuerdo(){
+
+    console.log (idmax);
+    mkey = idmax[0].Id + 1;
+    mkey = '{{ pais }}' + "-"  + mkey ;
+
+    document.getElementById("idacuerdo").value = mkey ;
+    consulta_intervalo();
+
+  }
+  
+  function calcular_idacuerdo1(){
+
+    //console.log (idmax);
+
+    var mkey = '';
+    // Obtiene el año
+    var sel = document.getElementById("maño_inicio");
+    var año= sel.options[sel.selectedIndex].text;
+    año = "2022"
+
+    for (i = 0; i < idmax.length; i++) {
+
+      console.log(idmax);
+
+      if (año == idmax[i].Periodo)
+      {
+        mkey = idmax[i].Id + 1;
+        mkey = '{{ pais }}' + "-"  + mkey ;
+        
+      }
+
+    }
+    if (mkey == '')
+    {
+      mkey = año  + '0001' ;
+      mkey = '{{ pais }}' + "-"  + mkey ; 
+    }
+
+    document.getElementById("idacuerdo").value = mkey ;
+    consulta_intervalo();
+
+  }
+
+
+  function consulta_plazos() {
+
+    // Borra los elementos actuales
+    document.getElementById("mbanda").innerHTML = "";
+    $('#mbanda').selectpicker('refresh');
+    
+    // Obtiene el plazo
+    var sel = document.getElementById("mplazo");
+    var mplazo= sel.options[sel.selectedIndex].text;
+
+    $('#mbanda').append($('<option data-divider="true"></option>'));
+    for (i = 0; i < bandas.length; i++) {
+      if (bandas[i].Plazo == mplazo ){
+        mvalor = bandas[i].Id;
+        mtexto = bandas[i].Banda + ': de ' + bandas[i].Resumen;
+        $('#mbanda').append($('<option>', {value:mvalor, text: mtexto}));
+      }
+    }
+    // Limpia los valores
+    $('#mbanda').selectpicker('refresh');
+    document.getElementById("cantidad_mes").value = '';
+    document.getElementById("unidades_total").value = '';
+    document.getElementById("freegoods").value = '';
+
+    consulta_intervalo();
+
+  }
+
+
+  function consulta_banda(){
+
+    // Obtiene la banda
+    var sel = document.getElementById("mbanda");
+    var Id= sel.options[sel.selectedIndex].value;
+
+    for (i = 0; i < bandas.length; i++) {
+      if (bandas[i].Id == Id ){
+        document.getElementById("cantidad_mes").value = bandas[i].Minimo ;
+        document.getElementById("unidades_total").value = bandas[i].Minimo * bandas[i].Meses ;
+        calcular_fregoods(i);
+      }
+    }
+
+  }
+
+  function consulta_totales(){
+
+    // Obtiene la banda
+    var sel = document.getElementById("mbanda");
+    var Id= sel.options[sel.selectedIndex].value;
+
+    for (i = 0; i < bandas.length; i++) {
+      if (bandas[i].Id == Id ){
+        m = document.getElementById("cantidad_mes").value  ;
+        mtotal = m ;
+        // Verifica que este entre los limites
+        if ( mtotal >= bandas[i].Minimo && mtotal <= bandas[i].Maximo )
+        {
+          document.getElementById("unidades_total").value = m * bandas[i].Meses ;
+        }
+        else
+        {
+          Swal.fire('Unidades fuera del rango. Se pondra el minimo');
+          document.getElementById("cantidad_mes").value = bandas[i].Minimo ;
+          document.getElementById("unidades_total").value = bandas[i].Minimo * bandas[i].Meses;
+        }
+        calcular_fregoods(i);
+        break;
+
+      }
+    }    
+
+  }
+
+
+  function calcular_fregoods(i){
+
+    // Calcula los freegoods
+    mdescuento = bandas[i].descuento;
+    var mregla = bandas[i].Regla;    
+    var n = mregla.search("%");
+    // Si es % calcula el valor si es 1/6 calcula el modulo
+    if (n > 0)
+    {
+      mporcentaje =mregla.replace("%","");
+      document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value * (mporcentaje/100));
+      
+    }
+    else
+    {      
+      document.getElementById("freegoods").value = parseInt(document.getElementById("unidades_total").value / 6);
+      mporcentaje = 1/6;
+    }
+
+  }
+
+  function consulta_intervalo(){
+
+    var sel = document.getElementById("maño_inicio");
+    var maño = sel.options[sel.selectedIndex].value;
+
+    var sel = document.getElementById("mmes_inicio");
+    var mmes = sel.options[sel.selectedIndex].value;
+
+    var sel = document.getElementById("mplazo");
+    var mplazo= sel.options[sel.selectedIndex].value;
+    mplazo = mplazo - 1;
+
+    mfecha = maño + "/" + mmes + "/01" ;
+    mfin = moment(mfecha, 'YYYY/MM/DD').add('month', mplazo);
+    mfin = mfin.format('YYYY/MM/DD');
+    
+    var añofin = moment(moment(mfin).format("YYYY/MM/DD")).format('YYYY');
+    var mesfin = moment(moment(mfin).format("YYYY/MM/DD")).format('M');
+
+
+    if (mesfin<10){
+      mesfin = "0" + mesfin;
+    }
+       
+
+
+    $('#maño_fin').selectpicker('val', [añofin]);
+    $('#maño_fin').selectpicker('refresh');
+
+    $('#mmes_fin').selectpicker('val', [ mesfin]);
+    $('#mmes').selectpicker('refresh');
+
+  }
+
+
+  function btn_guardar(){
+
+    // Obtiene los datos del formulario acuerdo_add
+    try {
+      var sel = document.getElementById("cliente");
+      var cliente= sel.options[sel.selectedIndex].text;
+      cliente = cliente.split('|');
+      cliente[0] = cliente[0].trim();
+      cliente[1] = cliente[1].trim();
+
+      var sel = document.getElementById("maño_inicio");
+      var maño_inicio = parseInt(sel.options[sel.selectedIndex].text);
+
+      var sel = document.getElementById("mmes_inicio");
+      var mmes_inicio = parseInt(sel.options[sel.selectedIndex].value);
+
+      var sel = document.getElementById("mplazo");
+      var mplazo = parseInt(sel.options[sel.selectedIndex].value);
+
+      var sel = document.getElementById("mbanda");
+      var mbanda = sel.options[sel.selectedIndex].value;
+
+      var sel = document.getElementById("maño_fin");
+      var maño_fin = parseInt(sel.options[sel.selectedIndex].text);
+
+      var sel = document.getElementById("mmes_fin");
+      var mmes_fin = parseInt(sel.options[sel.selectedIndex].value);    
+    }
+    catch{
+      Swal.fire('Debe llenar todos los datos del acuerdo!!!');
+      return
+
+    }
+
+
+    if (cliente[0] == ''  || $('#idacuerdo').val() == '' || maño_inicio == '' || mmes_inicio == '' || isNaN(mplazo)  || isNaN(mbanda) )
+    {
+      Swal.fire('Debe llenar todos los datos del acuerdo!!!');
+      return
+    }
+
+
+    var row = {
+      idacuerdo: $('#idacuerdo').val(),
+      idconsultor: '{{ idconsultor }}',
+      consultor: '{{ usuario }}',
+      idcliente: cliente[0],
+      cliente: cliente[1],
+      mes_ini:mmes_inicio,
+      ano_ini:maño_inicio,
+      tipo_acuerdo:'Regular',
+      cantidad_periodo:$('#cantidad_mes').val(), 
+      duracion:mplazo,
+      unidades_total:$('#unidades_total').val(), 
+      banda:mbanda,
+      freegoods:$('#freegoods').val(),
+      mes_fin:mmes_fin,
+      ano_fin:maño_fin,
+      vigente:1,
+      pais:'{{ pais }}',
+      num_entregas:0,
+      num_entregas_cierre:0,
+      anulado:0,
+      entrega_x_porcentaje:0,
+      porc_piso_entrega:0,
+      porc_cumplimiento:0,
+      fgs_sobre_cien:mporcentaje,
+      porc_descuento:mdescuento,
+      aprobado:0
+
+    };
+
+
+    $.ajax({
+    url:"/acuerdos_guardar",
+    type:"POST",
+    data: {row},
+    success: function(response){
+
+      Swal.fire(response);
+      
+    }
+  
+
+  });
+
+}
+
+  </script>  
+
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+{% block title %}Mis Acuerdos {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+
+<div class="container">
+
+<div class="alert alert-primary" role="alert">
+    <h2>Mis Acuerdos</h2>
+</div>
+
+<hr>
+
+
+<table id="dt" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Id Usuario</th>
+        <th>Usuario</th>
+        <th>Pais</th>
+      </tr>
+      </thead>
+      <tbody>
+        {% for row in data: %}
+        
+        <tr>
+          <td>
+            <button type="button" class="btn btn-light" onclick="window.location.href='/acuerdosdetalle/{{ row[0] }}/{{ row[1] }}/{{ row[2] }}'">
+                Acuerdos Detalle <span class="badge badge-pill badge-info">{{ row[3] }}</span>                
+              </button>              
+          </td>
+          <td>{{ row[0] }}</td>
+          <td>{{ row[1] }}</td>
+          <td>{{ row[2] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+  </table>
+
+</div>  
+
+  <script>
+
+
+    $(document).ready(function() {
+
+        // Setup - add a text input to each footer cell
+        $('#dt thead tr').clone(true).appendTo( '#dt thead' );
+        $('#dt thead tr:eq(1) th').each( function (i) {
+          // La primera columna no tiene busqueda
+          if (i == 0) {
+            var title = $(this).text();
+              $(this).html( 'Acuerdos por Usuario' );
+          }
+          // coloca el filtro a las demas columnas
+          if (i > 0) {
+              var title = $(this).text();
+              $(this).html( '<input type="text" placeholder="Buscar '+title+'" />' );
+
+              $( 'input', this ).on( 'keyup change', function () {
+                  if ( table.column(i).search() !== this.value ) {
+                      table
+                          .column(i)
+                          .search( this.value )
+                          .draw();
+                  }
+              } );
+          }
+        });
+
+        var table = $('#dt').DataTable( {   
+        aLengthMenu: [ [10, 20, 50, 100, -1], [10, 20, 50, 100, "Todos"] ],                        
+        orderCellsTop: true,
+        fixedHeader: true,
+        language: {"url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"},
+        "order": [[ 1, "asc" ]]
+        } );        
+                
+
+    });
+
+  </script>  
+
+
+
+{% endblock %}

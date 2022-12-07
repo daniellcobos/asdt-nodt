@@ -1,0 +1,17 @@
+<script src= "{{ url_for('static', filename='js/formatos.js') }}" ></script>
+
+{% for row in dt %}
+    
+    <tr>
+        <td onclick="pcd_ver_liberaciones('{{ row[0] }}')">{{ row[0] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[4] }}</td>
+        <td>{{ row[6] }}</td>
+        <td>{{ row[5] | formatomes }}</td>
+        <td>{{ row[14] }}</td>
+        <td>{{ row[13] | formatomes }}</td>
+        <td>{{ row[9] }}</td>
+        <td>{{ row[15] | formatovigente }}</td>
+        <td>{{ row[17] }}</td>
+    </tr>
+{% endfor %}

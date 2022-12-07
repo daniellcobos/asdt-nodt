@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      
+    <link rel="icon" type="image/png" href="/static/favicon.ico">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Boostrap 4.5 -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Select dinamico -->   
+    <link rel="stylesheet" href="{{ url_for('static', filename='js/bootstrap-select-1.13.14/dist/css/bootstrap-select.min.css') }}">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src= "{{ url_for('static', filename='js/bootstrap-select-1.13.14/dist/js/bootstrap-select.min.js') }}" ></script>
+    <!-- (Optional) Latest compiled and minified JavaScript translation files -->
+    <script src= "{{ url_for('static', filename='js/bootstrap-select-1.13.14/dist/js/i18n/defaults-es_ES.min.js') }}" ></script>
+    <!-- Formatos propios -->
+    <script src= "{{ url_for('static', filename='js/formatos.js') }}" ></script>
+
+
+
+    <!-- dt table con exportacion -->
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.print.min.js"></script>
+
+    <link href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.dataTables.min.css" rel="stylesheet">
+    
+    <!-- Alertas -->   
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+
+    <!-- Momentjs -->   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>
+
+  <head>
+    {% block head %}
+    <title>{% block title %}{% endblock %} Allergan</title>
+    {% endblock %}
+  </head>
+
+
+
+
+<!-- 
+custom nvbar color 
+-->
+
+
+
+<nav class="navbar navbar-expand navbar-custom ">
+  <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCustom">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <img src="{{url_for('static', filename='img/logo.jpg')}}" width='150' height='40' style = ' border-radius: 5%;' />
+        
+    
+    <div class="navbar-collapse collapse" id="navbarCustom">
+        <ul class="navbar-nav">  
+             
+            <li>              
+                <a href="/misacuerdos" class="nav-link"><i class="fa fa-handshake" aria-hidden="true"></i> Mis Acuerdos</a>
+            </li>
+
+            <li class=" nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-chart-bar"></i> Reportes
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a id='mnu_dashboard' class="dropdown-item" href="#"><i class="fas fa-database"></i> Dashboard</a>
+                <a id='mnu_todosacuerdos' class="dropdown-item" href="/todosacuerdos"><i class="fas fa-database"></i> Todos los acuerdos</a>
+                <a id='mnu_liberaciones_total' class="dropdown-item" href="/liberaciones_total"><i class="fas fa-database"></i> Liberaciones Total</a>
+                <a id='mnu_liberaciones_mes' class="dropdown-item" href="/liberaciones_mes"><i class="fas fa-database"></i> Liberaciones mes actual</a>                
+                <a id='mnu_aprobaciones_pendientes' class="dropdown-item" href="/aprobaciones_pendientes"><i class="fas fa-database" id='mnu_aprobaciones_pendientes'></i> Aprobaciones Pendientes</a>
+                <a id='mnu_net_floor' class="dropdown-item" href="/net_floor"><i class="fas fa-database"></i> Net Floor</a> 
+                <a id='mnu_historial' class="dropdown-item" href="/busqueda_general/{{ session['pais'] }}"><i class="fas fa-database"></i> Historial</a> 
+              </div>
+            </li>
+            
+            
+            <li id='mnu_parametros' class=" nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fab fa-whmcs"></i> Parametros
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <!--<a class="dropdown-item" href="/parametrosfg"><i class="fas fa-database"></i> Parametros FG's</a>-->
+                <a class="dropdown-item" href="/clientes"><i class="fas fa-database"></i> Tabla de Clientes</a>
+                <!--<a class="dropdown-item" href="/liberaciones"><i class="fas fa-database"></i> Tabla de Liberaciones</a>-->
+                <a class="dropdown-item" href="/freegoods"><i class="fas fa-database"></i> Freegoods y Bandas</a>
+                <a class="dropdown-item" href="/productos"><i class="fas fa-database"></i> Tabla de Productos</a>
+                <a class="dropdown-item" href="/ventas"><i class="fas fa-database"></i> Tabla de Ventas</a>
+                <a class="dropdown-item" href="/precios"><i class="fas fa-database"></i> Tabla de Precios</a>
+                <a class="dropdown-item" href="/sistema"><i class="fas fa-database"></i> Sistema</a>
+              </div>
+            </li>
+
+            <li class=" nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-fw fa-user"></i> Administracion
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" href="/usuarios_grilla"><i class="fa fa-fw fa-user"></i> Usuarios</a>
+              </div>
+            </li>
+
+        </ul>
+
+          <a class="nav-link disabled" href="#"></a>
+          <a class="nav-link disabled" href="#"></a>
+  
+
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link"><i aria-hidden="true"></i> {{ session['id'] }}</a>
+            </li>          
+            <li class="nav-item">
+                <a href="/logout" class="nav-link"><i class="fa fa-user" aria-hidden="true"></i> Logout</a>
+            </li>
+        </ul>
+
+    </div>
+
+  </div>
+</nav>
+
+<body style="margin:10x;padding:5px">
+    <hr>
+    <div id="content">
+      {% block content %}
+      {% endblock %}
+    </div>
+    <div id="footer" class="fixed-bottom " style="z-index: -200;">
+      <hr>
+      
+      {% block footer %}<center>© 2021 Synapsis Research SAS. All rights reserved. </center>{% endblock %}
+    </div>
+  </body>  
+
+  <script>
+  // Permisos del sistema
+  $('#mnu_dashboard').hide();
+  {% if ( session['nivel'] == 1 ) %}            
+    $('#mnu_parametros').hide();
+    $('#mnu_dashboard').hide();
+    $('#mnu_aprobaciones_pendientes').hide();    
+    $('#mnu_net_floor').hide();   
+    $('#mnu_historial').hide();   
+  {% endif %} 
+
+  {% if ( session['nivel'] == 2 ) %}            
+    $('#mnu_parametros').hide();
+    $('#mnu_dashboard').hide();
+    $('#mnu_aprobaciones_pendientes').hide();    
+  {% endif %}   
+
+  </script>
+</html>

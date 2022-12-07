@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+
+<div class="alert alert-primary" role="alert">
+    <h2>Tabla de Clientes</h2>
+</div>
+
+<hr>
+<td><a class="btn btn-primary" href="/clientes_add" role="button"  data-toggle="tooltip" data-placement="top" title="Agregar un Cliente"><i class="fas fa-plus-circle"></i></a></td>
+<td><button type='button' class='btn btn-primary' data-toggle='tooltip' data-placement='top' title='Importar de Excel' onclick='btn_importar()'><i class="fas fa-upload"></i></button></td>
+<td><button type='button' class='btn btn-primary' data-toggle='tooltip' data-placement='top' title='Exportar a Excel' onclick='btn_exportar()'><i class='fa fa-file-excel'></i></button></td>
+<a id = 'mlink_exportacion' href=""></a>
+<hr>
+
+<table id="dt" class="table table-striped table-bordered nowrap">
+    <thead>
+      <tr>
+        <th></th>
+        <th></th>
+        <th>ID Veeva</th>
+        <th>ID SAP Cliente</th>
+        <th>Cliente</th>
+        <th>Consultor</th>
+        <th>ID Consultor</th>
+        <th>País</th>
+      </tr>
+      </thead>
+</table>      
+
+  </table>
+
+  <script>
+
+    dt = [];
+
+    i = 1;
+    {% for row in data: %}    
+      row = [
+      "<button type='button' class='btn btn-light' data-toggle='tooltip' data-placement='top' title='Editar Cliente' id = '{{ row[0] }}' onclick = 'fnt_editar(this)'><i class='fas fa-edit'></i></button>",
+      "<button type='button' class='btn btn-light' data-toggle='tooltip' data-placement='top' title='Borrar Cliente' id = '{{ row[0] }}' onclick = 'fnt_borrar(this)'><i class='fas fa-trash'></i></button>",
+      '{{ row[4] }}','{{ row[0] }}','{{ row[1] }}','{{ row[3] }}','{{ row[2] }}','{{ row[5] }}'];
+      i = i + 1;
+      dt.push(row);
+
+    {% endfor %}
+
+    $(document).ready(function() {
+      // Setup - add a text input to each footer cell
+      $('#dt thead tr').clone(true).appendTo( '#dt thead' );
+      $('#dt thead tr:eq(1) th').each( function (i) {
+        // coloca el filtro a las demas columnas
+        if (i >= 2) {
+            var title = $(this).text();
+            $(this).html( '<input type="text" placeholder="Buscar '+title+'" />' );
+
+            $( 'input', this ).on( 'keyup change', function () {
+                if ( table.column(i).search() !== this.value ) {
+                    table
+                        .column(i)
+                        .search( this.value )
+                        .draw();
+                }
+            } );
+        }
+    });
+
+var table = $('#dt').DataTable( {   
+aLengthMenu: [ [10, 20, 50, 100, -1], [10, 20, 50, 100, "Todos"] ],                 
+data: dt,       
+orderCellsTop: true,
+fixedHeader: true,
+    buttons: ['copy', 'excel'],
+language: {"url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"},
+"order": [[ 1, "desc" ]]
+} );        
+        
+
+});
+
+
+    function fnt_editar(row){
+      window.location.href ='/clientes_edit/' + row.id;
+    };
+
+    function fnt_borrar(row){
+      borrar_cliente('/clientes_borrar/' + row.id);
+    };
+
+    function borrar_cliente(path){
+          Swal.fire({
+            title: '¿Esta seguro?',
+            text: "No podra revertir esta operacion",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, borrar Cliente!'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              Swal.fire(
+                'Borrado!',
+                'El cliente fue borrado exitosamente',
+                window.location.href= path
+              )
+            }
+          })
+
+        }
+
+    async function btn_importar(){
+
+      const { value: file } = await Swal.fire({
+      title: 'Seleccione el archivo a imporar',
+      input: 'file',
+      inputAttributes: {
+        accept: '*.*',
+        'aria-label': 'Importar Archivo'
+      }
+    })
+
+    if (file) {
+      let formData = new FormData();           
+      formData.append("file", file);
+      await fetch('/importar_clientes', {
+        method: "POST", 
+        body: formData,
+      }).then(response =>{ 
+
+      response.text().then((r) =>{
+          Swal.fire(r);
+          if (r === 'Ok, importado'){
+                location.reload();
+          }
+      }
+      )
+
+      });  
+      
+
+    }      
+
+    };
+
+    function btn_exportar(){
+
+      $.ajax({
+            url:"/clientes_exportar/",
+            type:"GET",
+            success: function(response){
+              Swal.fire("Archivo exportado");
+              a = "{{ url_for('static', filename='/downloads/') }}"
+              a = a + response;
+              document.getElementById("mlink_exportacion").innerText = response; 
+              document.getElementById("mlink_exportacion"). href= a;
+
+
+            }
+          });       
+
+      }
+
+
+</script>
+  
+
+
+
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+
+<div class="alert alert-primary" role="alert">
+    <h2>Net Floor</h2>
+</div>
+<hr>
+
+<a>Seleccione el producto de referencia: </a>
+<select id="idproducto"  class="selectpicker show-tick" data-live-search="true">
+  <option data-divider="true"></option> 
+    {% for row in data: %}            
+      <option value='{{ row[1] }}'>{{ row[0] }}</option> 
+    {% endfor %}              
+  </select>  
+
+
+<button type="button" class="btn btn-info" onclick="btn_crear_net_floor()">Crear informe</button>
+<h3 id="mensaje_exportacion"></h3>    
+<a id = 'mlink_exportacion' href="">Click para ver el informe de NetFloor en Excel</a>
+
+
+
+<script>
+
+  // Carga la pagina
+  window.onload = (event) => {      
+    document.getElementById("mlink_exportacion").style.visibility = "hidden"; 
+    $('#idproducto').selectpicker('val', ['Botox']);
+    $('.selectpicker').selectpicker('refresh')
+  };  
+
+function btn_crear_net_floor(){
+      var mensaje = document.getElementById("mensaje");
+      var idproducto = document.getElementById("idproducto");
+      const producto = [].filter
+        .call(idproducto.options, option => option.selected)
+        .map(option => option.value); 
+        
+      
+
+
+      $.ajax({
+      url:"/crear_net_floor/" + producto,
+      type:"POST",
+      data: {idproducto : producto},
+      success: function(response){
+
+        a = "{{ url_for('static', filename='/downloads/') }}"
+        a = a + response;
+
+        document.getElementById("mlink_exportacion"). href= a;
+        document.getElementById("mlink_exportacion").style.visibility = "visible"; 
+
+
+      },
+      error: function(error){
+          console.log(error);
+    },
+    });
+  }  
+
+</script>
+
+
+
+{% endblock %}

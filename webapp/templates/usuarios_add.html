@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+  
+
+{{ super() }}  
+{% endblock %}
+{% block content %}
+
+
+<div class="alert alert-primary" role="alert">
+  <h2>Agregar Usuario</h2>
+</div>
+
+<div class="container">
+  
+  <div class="row">
+    <div class="col-sm-2">Perfil</div>
+    <div class="col-sm-6">
+      <select id="perfil"  class="selectpicker show-tick" data-width="100%" data-live-search="true" >
+        <option value= -1 > Admin de País </option>                                        
+        <option value= 1 > Consultor </option>  
+        <option value= 2 > Servicio al cliente </option>  
+        <option value= 10 > Gerente de Ventas </option>                                                              
+        <option value= 11 > Business Unit Head </option>                                                              
+        <option value= 12 > Area de Finanzas </option>                                                              
+      </select>  
+    </div>
+  </div> 
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">Pais</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="pais" name="pais" value="{{ session['pais'] }}" readonly></div>
+  </div>
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">Id Usuario</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="idusuario" name="idusuario"></div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-sm-2">Usuario</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="usuario" name="usuario"></div>
+  </div> 
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">e-mail</div>
+    <div class="col-sm-6"><input type="text" class="form-control" id="email" name="email"></div>
+  </div>   
+  <br>  
+  <div class="row">
+    <div class="col-sm-2">Password</div>
+    <div class="col-sm-6"><input type="text" class="form-control hidetext" id="password" name="password"></div>
+  </div>   
+  <hr>
+  <td><button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Agregar Cliente" onclick="btn_guardar()">Guardar</button></td>
+  <td><a class="btn btn-primary" href="/usuarios_grilla" role="button"  data-toggle="tooltip" data-placement="top">Volver</a></td>
+  <hr>   
+</div>  
+
+  <script>
+
+function btn_guardar(){
+
+// Obtiene los datos del formulario add
+
+if ( $('#idusuario').val() == '' || $('#usuario').val() == '' || $('#email').val() == '' || $('#password').val() == ''  )
+  {
+    Swal.fire('Debe llenar todos los datos!!!');
+    return
+  }
+  
+var row = {
+  perfil: $('#perfil').val(),
+  pais: $('#pais').val(),
+  idusuario: $('#idusuario').val(),
+  usuario: $('#usuario').val(),
+  email: $('#email').val(),
+  password: $('#password').val()  
+};
+
+console.log(row);
+
+$.ajax({
+  url:"/usuarios_guardar",
+  type:"POST",
+  data: row,
+  success: function(response){
+
+    Swal.fire(response);
+    
+  }
+
+});
+
+}
+
+
+ 
+  </script>  
+
+{% endblock %}
