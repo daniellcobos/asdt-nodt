@@ -2,3 +2,4 @@ configuraciones.py
 *.xlsx
 *.xls
 log.txt
+/webapp/upload/

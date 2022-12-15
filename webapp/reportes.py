@@ -34,10 +34,12 @@ locale.setlocale(locale.LC_ALL, 'es_CO.utf8')
 
 @app.route('/liberaciones_total', methods=['GET','POST'])
 def liberaciones_total():
+    today = datetime.now()
     if request.method == 'POST':
         year = request.form['year']
+    elif today.month == 12:
+        year = str(today.year + 1)
     else:
-        today = datetime.now()
         year = today.strftime("%Y")
 
 
@@ -58,7 +60,7 @@ def liberaciones_total():
     else:
         msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max dl, dl.cantidad_periodo,  dl.periodo, da.porc_descuento ,  '' as cumplimiento from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = %s and da.idconsultor = %s and da.ano_fin = %s order by dl.idacuerdo,dl.corte"
         cur.execute(msql, (session['pais'], session['idconsultor'], year))
-
+    print(msql)
     data = cur.fetchall() 
     cur.close()
     conn.close() 
@@ -100,6 +102,9 @@ def liberaciones_total():
         , row[11], row[21], round(row[35] * 100,2), row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20], row[22], row[23]
         , row[24], row[25], row[26], row[27], row[28], row[29], row[30], row[31], row[32],row[34]]
         altarr.append(reorderedRoW)
+
+
+
     
     return render_template('reportes/liberaciones_total.html', data1 = altarr)
 

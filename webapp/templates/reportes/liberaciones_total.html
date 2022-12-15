@@ -64,7 +64,7 @@
   </tbody>
 </table>
     <div class="mt-1">
-    <span>Filtrar por año de entrega</span>
+    <span><b>Filtrar por año de Cierre</b></span>
     <form class="m-1" action="/liberaciones_total" method="post" >
    <input type="radio" name="year" value="2021"> 2021
     <input type="radio" name="year" value="2022"> 2022
@@ -76,9 +76,10 @@
 
 <script>
   const data = {{ data1| safe}}
+
   const tbody = document.getElementById("tableBody")
   
-  for (row of data){
+  /* for (row of data){
 
     const newTr = document.createElement("tr")
     for (i in row){
@@ -104,7 +105,7 @@
      tbody.appendChild(newTr)
   }
   
-
+*/
 
 
 
@@ -136,7 +137,9 @@
 
     var table = $('#dt').DataTable({
       aLengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "Todos"]],
+        data:data,
       dom: 'Blfrtip',
+        "deferRender": true,
       buttons: ['copy', 'excel'],
       orderCellsTop: true,
       fixedHeader: true,
