@@ -34,12 +34,10 @@ locale.setlocale(locale.LC_ALL, 'es_CO.utf8')
 
 @app.route('/liberaciones_total', methods=['GET','POST'])
 def liberaciones_total():
-    today = datetime.now()
     if request.method == 'POST':
         year = request.form['year']
-    elif today.month == 12:
-        year = str(today.year + 1)
     else:
+        today = datetime.now()
         year = today.strftime("%Y")
 
 
@@ -55,12 +53,12 @@ def liberaciones_total():
     mperiodo = mperiodo[0]
 
     if session['nivel'] != 1 :
-        msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux,dl.harmonyca, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max, dl.cantidad_periodo, dl.periodo ,  da.porc_descuento , '' as cumplimiento from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = %s  order by dl.idacuerdo,dl.corte"
-        cur.execute(msql, (session['pais'],))
+        msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max, dl.cantidad_periodo, dl.periodo ,  da.porc_descuento , '' as cumplimiento from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = %s and da.ano_fin = %s order by dl.idacuerdo,dl.corte"
+        cur.execute(msql, (session['pais'], year))
     else:
-        msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux,dl.harmonyca, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max dl, dl.cantidad_periodo,  dl.periodo, da.porc_descuento ,  '' as cumplimiento from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = %s and da.idconsultor = %s  order by dl.idacuerdo,dl.corte"
-        cur.execute(msql, (session['pais'], session['idconsultor']))
-    print(msql)
+        msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max dl, dl.cantidad_periodo,  dl.periodo, da.porc_descuento ,  '' as cumplimiento from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = %s and da.idconsultor = %s and da.ano_fin = %s order by dl.idacuerdo,dl.corte"
+        cur.execute(msql, (session['pais'], session['idconsultor'], year))
+
     data = cur.fetchall() 
     cur.close()
     conn.close() 
@@ -78,8 +76,8 @@ def liberaciones_total():
         for i,x in enumerate(t):
              if x == None:
                 t[i] = ''
-        t[36] = float(t[36])
-        p= str(t[35])
+        t[35] = float(t[35])
+        p= str(t[34])
         p = p[0:6]
         p = int(p)
 
@@ -88,24 +86,20 @@ def liberaciones_total():
             t[34] = ""
         elif (p > mperiodo):
             t[34] = ""
-        elif (int(t[32])*3) > int(t[12]) :
+        elif (int(t[31])*3) > int(t[12]) :
             t[34] = "Incumple"
-        elif (int(t[32])*3) <= int(t[12]) and (int(t[12]) <= int(t[33])*3):
+        elif (int(t[31])*3) <= int(t[12]) and (int(t[12]) <= int(t[32])*3):
             t[34] = "Cumple"
-        elif (int(t[12]) > int(t[33])*3):
+        elif (int(t[12]) > int(t[32])*3):
             t[34] = "Excede"
             
     
     altarr = []
     for row in arr:
         reorderedRoW = [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[33], row[9], row[12], row[10]
-        , row[11], row[22], round(row[36] * 100,2), row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20],row[21], row[23], row[24]
-        , row[25], row[26], row[27], row[28], row[29], row[30], row[31], row[32], row[33],row[34]]
-
+        , row[11], row[21], round(row[35] * 100,2), row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20], row[22], row[23]
+        , row[24], row[25], row[26], row[27], row[28], row[29], row[30], row[31], row[32],row[34]]
         altarr.append(reorderedRoW)
-
-
-
     
     return render_template('reportes/liberaciones_total.html', data1 = altarr)
 
@@ -160,9 +154,9 @@ def liberaciones_mes():
     mes_actual = prev_month_name
 
     if session['nivel'] != 1 :
-        msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max, dl.cantidad_periodo, dl.periodo , '' as cumplimiento from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' and dl.mes_entrega = '" + mes_actual + "'  and dl.ano_entrega = " + ano_actual +  " and total_venta >0 and corte <> 'Cierre' and da.aprobado <> '3' order by dl.idacuerdo,dl.corte"
+        msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max, dl.cantidad_periodo, dl.periodo , '' as cumplimiento from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' and dl.mes_entrega = '" + mes_actual + "'  and dl.ano_entrega = " + ano_actual +  " and total_venta >0 and corte <> 'Cierre' order by dl.idacuerdo,dl.corte"
     else:
-        msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max, dl.cantidad_periodo, dl.periodo , '' as cumplimiento from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' and dl.mes_entrega = '" + mes_actual + "'  and dl.ano_entrega = " + ano_actual +  " and total_venta > 0 and corte <> 'Cierre' and da.idconsultor = '" + session['idconsultor'] + "' and da.aprobado <> '3' order by dl.idacuerdo,dl.corte"
+        msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max, dl.cantidad_periodo, dl.periodo , '' as cumplimiento from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' and dl.mes_entrega = '" + mes_actual + "'  and dl.ano_entrega = " + ano_actual +  " and total_venta > 0 and corte <> 'Cierre' and da.idconsultor = '" + session['idconsultor'] + "' order by dl.idacuerdo,dl.corte"    
     print(msql)
     cur.execute(msql)
     data = cur.fetchall() 

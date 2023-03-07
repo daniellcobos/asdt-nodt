@@ -306,10 +306,16 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
   duracion = df1.duracion[0]
   i = 0
   for n in range(duracion):
-    p = datetime(df1.ano_ini,df1.mes_ini,1)
-    q = p + relativedelta(months=n)
-    i = i + 1
-    periodos.append(q)  
+    try:
+        p = datetime(df1.ano_ini,df1.mes_ini,1)
+        q = p + relativedelta(months=n)
+        i = i + 1
+        periodos.append(q)
+    except:
+        p = datetime(df1["ano_ini"].iloc[0], df1["mes_ini"].iloc[0], 1)
+        q = p + relativedelta(months=n)
+        i = i + 1
+        periodos.append(q)
 
 
   # Para cada cliente de un acuerdo busca si hay ventas y le pone el id del acuerdo
@@ -323,7 +329,8 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
   conn.close() 
 
 
-@app.route('/ventasxacuerdos1/<string:pais>', methods=['GET'])
+@app.route('/ventasxacuerdos1/<string:pais>', methods=['GET',"POST"])
+@app.route('/ventasxacuerdos1/<string:pais>', methods=['GET',"POST"])
 def ventasxacuerdos1(pais):
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
@@ -618,7 +625,7 @@ def importar_freegood():
         df = df.fillna(0)
         dt = df.to_numpy()
 
-    return freegood_insertar(dt)
+    return  freegood_insertar(dt)
 
 
 def freegood_insertar(df):
@@ -631,10 +638,11 @@ def freegood_insertar(df):
     msql = "insert into " \
            "dt_freegood(idbanda,banda,banda_min,banda_max,idplazo,plazo,porc_descuento,cant_mes_x_banda,resumen_banda,porc_fgs,pais,usar) " \
            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    print(msql,ftuple)
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
     try:
-        cur.execute("update dt_freegood set usar = 0 where pais = %s", (session['pais'], ) )
+        cur.execute("update dt_freegood set usar = 0 where pais = %s",(session['pais'], ) )
         psycopg2.extras.execute_batch(cur, msql, freegoodList)
         conn.commit()
         mensaje = 'Freegood Guardado'
@@ -653,4 +661,4 @@ def sistema():
     if session['nivel'] == -1:
         return render_template('parametros/sistema.html')
     else:
-        return redirect('/misacuerdos')
+         return redirect('/misacuerdos')

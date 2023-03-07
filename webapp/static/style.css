@@ -75,4 +75,15 @@
       opacity: 0;
     }
   }
-  
+  .btn-allergan{
+       border: 2px solid !important;
+          border-color: #b8daff;
+    background-color: #cce5ff;
+    color: #004085;
+
+  }
+  btn-allergan:hover{
+
+      background-color: #2c5596 !important;
+      color: whitesmoke;
+  }

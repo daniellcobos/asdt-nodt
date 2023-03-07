@@ -41,7 +41,9 @@
       <option value="202112">202210</option> 
       <option value="202112">202211</option> 
       <option value="202112">202212</option> 
-</select>    
+</select>
+    <td><button type='button' class='btn btn-primary' data-toggle='tooltip' data-placement='top' title='Vincular Ventas a Acuerdos' onclick='btn_vinventas()'>Vincular Ventas a Acuerdos</button></td>
+    <td><span id="vin" hidden> Vinculando...</span></td>
 <hr>
 
 <table id="dt" class="table table-striped table-bordered nowrap">
@@ -74,7 +76,8 @@
       a = ['{{row[4]}}', '{{row[5]}}', '{{row[6]}}', '{{row[7]}}', '{{row[8]}}', '{{row[9]}}', '{{row[2]}}', '{{row[3]}}', '{{row[10]}}', '{{row[11]}}'];
       dt.push(a);
     {% endfor %}
-
+    const pais = "{{ session["pais"] }}"
+    const vin = document.getElementById("vin")
 
     $(document).ready(function() {
 
@@ -175,7 +178,23 @@
 
       }
 
+ function btn_vinventas(){
 
+      vin.hidden = false
+
+      $.ajax({
+        url:"/ventasxacuerdos1/" + pais,
+        type:"POST",
+        success: function(response){
+
+          Swal.fire(response);
+          location.reload();
+
+        }
+
+      });
+
+      }
 
   </script>  
 
