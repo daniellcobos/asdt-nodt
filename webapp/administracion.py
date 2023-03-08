@@ -197,10 +197,16 @@ def ventas():
     # Trae todas las ventas
     msql =  "SELECT * FROM dt_ventas where pais = '" + session['pais'] + "'"
     cur.execute(msql)
-    data = cur.fetchall() 
+    data = cur.fetchall()
+    msql = "Select distinct idperiodo from dt_ventas order by idperiodo asc"
+    cur.execute(msql)
+    lista = cur.fetchall()
+    listarr= []
+    for l in lista:
+        listarr.append(l[0])
     cur.close()
     conn.close()
-    return render_template('parametros/ventas.html', data = data)
+    return render_template('parametros/ventas.html', data = data, lista=listarr)
 
 # Importa el archivo de ventas
 @app.route('/importar_ventas' , methods=["GET", "POST"])    

@@ -16,31 +16,9 @@
 <td><button type='button' class='btn btn-primary' data-toggle='tooltip' data-placement='top' title='Importar de Excel' onclick='btn_importar()'><i class="fas fa-upload"></i></button></td>
 <td><button type='button' class='btn btn-primary' data-toggle='tooltip' data-placement='top' title='Borrar Periodo' onclick='btn_borrar()'><i class='fas fa-minus-circle'></i></button></td>
 <select id="mperiodo"  class="selectpicker show-tick" data-live-search="true">
-  <option data-divider="true"></option> 
-      <option value="202101">202101</option> 
-      <option value="202102">202102</option> 
-      <option value="202103">202103</option> 
-      <option value="202104">202104</option> 
-      <option value="202105">202105</option> 
-      <option value="202106">202106</option> 
-      <option value="202107">202107</option> 
-      <option value="202108">202108</option> 
-      <option value="202109">202109</option> 
-      <option value="202110">202110</option> 
-      <option value="202111">202111</option> 
-      <option value="202112">202112</option> 
-      <option value="202112">202201</option> 
-      <option value="202112">202202</option> 
-      <option value="202112">202203</option> 
-      <option value="202112">202204</option> 
-      <option value="202112">202205</option> 
-      <option value="202112">202206</option> 
-      <option value="202112">202207</option> 
-      <option value="202112">202208</option> 
-      <option value="202112">202209</option> 
-      <option value="202112">202210</option> 
-      <option value="202112">202211</option> 
-      <option value="202112">202212</option> 
+  <option data-divider="true"></option>
+
+
 </select>
     <td><button type='button' class='btn btn-primary' data-toggle='tooltip' data-placement='top' title='Vincular Ventas a Acuerdos' onclick='btn_vinventas()'>Vincular Ventas a Acuerdos</button></td>
     <td><span id="vin" hidden> Vinculando...</span></td>
@@ -198,6 +176,15 @@
 
   </script>  
 
-
+<script>
+const lista = {{ lista|safe }}
+const mperiodo = document.getElementById("mperiodo")
+for (const el of lista){
+    const option = document.createElement("option")
+    option.value = el
+    option.innerText = el
+    mperiodo.appendChild(option)
+}
+</script>
 
 {% endblock %}
