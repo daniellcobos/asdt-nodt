@@ -532,7 +532,8 @@ def busqueda_generalxidacuerdo():
     idacuerdo = campos["idacuerdo"]
     msql =  "SELECT * FROM dt_liberacion where idacuerdo = '" + idacuerdo + "' order by idliberacion "
     cur.execute(msql)
-    dt = cur.fetchall() 
+    dt = cur.fetchall()
+    print(dt)
     return render_template('reportes/sub_busqueda_general_tabla_liberaciones.html', dt = dt)
 
 @app.route('/busqueda_generalxventas', methods=['POST'])
