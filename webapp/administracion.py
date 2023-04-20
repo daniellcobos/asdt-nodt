@@ -286,7 +286,7 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
   colnames = [desc[0] for desc in cur.description]
 
   df1 = pd.DataFrame(row, columns=colnames)
-  df1
+
 
   cliente = df1.idcliente
   clientes.append(cliente.iloc[0])
@@ -324,10 +324,14 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
         periodos.append(q)
 
 
+
   # Para cada cliente de un acuerdo busca si hay ventas y le pone el id del acuerdo
-  for cliente in clientes:  
+  for cliente in clientes:
+    #Convierte el id del cliente a mayuscula
+    clientequery = cliente.upper()
+    print(clientequery)
     for periodo in periodos:    
-      msql = "update dt_ventas set idacuerdo = '"+ idacuerdo + "' where sap_id = '" + cliente + "' and idperiodo = '" + periodo.strftime("%Y%m") + "'"
+      msql = "update dt_ventas set idacuerdo = '"+ idacuerdo + "' where sap_id = '" + clientequery + "' and idperiodo = '" + periodo.strftime("%Y%m") + "'"
       cur.execute(msql)
       conn.commit()
 

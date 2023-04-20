@@ -31,8 +31,23 @@
 <br>
 <button type="button" class="btn btn-allergan" onclick="btn_consolidar_total()" >Consolidar Liberaciones Totales</button>
     <hr>
+    <form  class="form-group" action="/reprocesar" method="post" >
+    <label for="idacuerdo">IdAcuerdo: </label>
+     <input class="form-control" name="idacuerdo" id="idacuerdo">
+    <input class="btn btn-allergan" type="submit" value="Reprocesar">
+    </form>
 <div id="placeholder" style="display:none ;"><div class="lds-ripple"><div></div><div></div></div></div>
-  <script>
+
+
+
+
+
+
+
+    <script>
+
+
+
  const placeholder= document.getElementById("placeholder")
 
     function btn_borrar_liberaciones(){
