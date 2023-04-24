@@ -215,10 +215,16 @@ def importar_ventas():
     mensaje = "Sin procesar"        
     uploaded_file = request.files['file']
     archivo = os.path.join(app.root_path, 'static/uploads/' , uploaded_file.filename)
+    archivolog = os.path.join(app.root_path, 'static/', "uploadlog.txt")
     if uploaded_file.filename != '':
         archivo = uploaded_file.save(archivo)
         df = pd.read_excel(os.path.join(app.root_path, 'static/uploads/' , uploaded_file.filename), sheet_name= 0 , engine='openpyxl')
+        #Numero de clientes de ventas, para el reporte
+        nc = str(df["sap_id"].nunique())
         df = df.fillna(0)
+        #numero de ventas por cliente para el reporte
+        df2 = df.groupby(['sap_id'])['cantidad'].sum().to_string()
+
         dt = df.to_numpy()
         conn = psycopg2.connect(db_connection_string)
         cur = conn.cursor()
@@ -245,9 +251,13 @@ def importar_ventas():
             mensaje = ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion)
             i = i + 1
         
-        # Determina a aque acuerdo esta una venta
+        # Determina a que acuerdo esta una venta
         ventasxacuerdos1(session['pais'])
-
+        with open(archivolog, "a+") as log:
+            log.write("Cantidad de Clientes: " + nc + " Pais: "+ session['pais']  + "Fecha: "+ datetime.now().strftime("%m/%d/%Y, %H:%M:%S") +"\n" )
+            log.write("Ventas por SAP" +"\n"  )
+            log.write(df2)
+            log.write("\n")
     mensaje = 'Ok, importado'
 
     return mensaje

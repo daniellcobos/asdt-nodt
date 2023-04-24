@@ -1088,9 +1088,11 @@ def totalizar_ventas(idacuerdo):
             p7 = 0
             p8 = 0
             p9 = 0
-            mtotal = 0 
+            mtotal = 0
+            #checkeo de total
+            checkeo = 0
             for p in productos:
-
+                checkeo = checkeo + p[1]
                 #if p[0] == "BOTOX" or p[0] == "BOTOX 100U" or p[0] == "BOTOX 50U" or p[0] == "BOTOX 1 Vial (100 Units) A":
                 if p[0] == "BOTOX" or p[0] == "BOTOX 100U" or p[0] == "BOTOX 1 Vial (100 Units) A":
                     q1 = q1 + round(p[1])
@@ -1112,7 +1114,8 @@ def totalizar_ventas(idacuerdo):
                     q9 = round(p[1])
             
             mventa = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9))
-
+            if mventa != checkeo:
+                print("Revisar" + idacuerdo)
             mtotal = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9)*porcentaje)
             #print(mtotal)
             mtotalac = mtotalac + ((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9) * porcentaje)

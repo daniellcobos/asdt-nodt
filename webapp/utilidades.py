@@ -38,9 +38,9 @@ def acuerdos_sin_vigencia():
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
     # Updates both last month and last year
-    msql =  "update dt_acuerdo set vigente = 0 where (ano_fin = (%s) and mes_fin = (%s)) or ano_fin < (%s)"
+    msql = "update dt_acuerdo set vigente = 0 where (ano_fin = (%s) and mes_fin <= (%s)) or ano_fin < (%s)"
     cur.execute(msql,(str(año),str(mes),str(cyear)))
-    print(msql)
+    print(msql,str(año),str(mes),str(cyear))
     conn.commit()
     msql = "update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );"
     print(msql)
