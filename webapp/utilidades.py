@@ -49,4 +49,5 @@ def acuerdos_sin_vigencia():
     conn.commit()
     cur.close()
     conn.close()  
-    return "ok"    
+    return "ok"
+

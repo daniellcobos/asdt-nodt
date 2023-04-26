@@ -1043,6 +1043,7 @@ def consolidar_total():
 
 @app.route('/totalizar_ventas/<string:idacuerdo>', methods=['GET','POST'])
 def totalizar_ventas(idacuerdo):
+    archivolog = os.path.join(app.root_path, 'static/', "uploadlog.txt")
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()    
     # Trae los datos de liberacion
@@ -1093,6 +1094,7 @@ def totalizar_ventas(idacuerdo):
             checkeo = 0
             for p in productos:
                 checkeo = checkeo + p[1]
+
                 #if p[0] == "BOTOX" or p[0] == "BOTOX 100U" or p[0] == "BOTOX 50U" or p[0] == "BOTOX 1 Vial (100 Units) A":
                 if p[0] == "BOTOX" or p[0] == "BOTOX 100U" or p[0] == "BOTOX 1 Vial (100 Units) A":
                     q1 = q1 + round(p[1])
@@ -1114,8 +1116,11 @@ def totalizar_ventas(idacuerdo):
                     q9 = round(p[1])
             
             mventa = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9))
+            print(q1 , q2 , q3 , q4 , q5 , q6 , q7 , q8,q9)
+            print(mventa,checkeo)
             if mventa != checkeo:
-                print("Revisar" + idacuerdo)
+                with open(archivolog, "a+") as log:
+                    log.write("Revisar "+ idacuerdo+" corte: "+corte+"\n")
             mtotal = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9)*porcentaje)
             #print(mtotal)
             mtotalac = mtotalac + ((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9) * porcentaje)
