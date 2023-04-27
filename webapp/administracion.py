@@ -716,6 +716,10 @@ def metricas():
     msql = "select count(*) from dt_liberacion where pais = %s and idacuerdo in (select dt_acuerdo.idacuerdo  from dt_acuerdo where vigente = 1);"
     cur.execute(msql, (session['pais'],))
     n2 = cur.fetchone()
+    df.to_excel("v1.xlsx")
+    df2.to_excel("v2.xlsx")
+    df3.to_excel("v3.xlsx")
+    df4.to_excel("v4.xlsx")
     with open(archivolog, "w+") as log:
             log.write("Cantidad de ventas por mes: \n" )
             log.write(df.to_string() + "\n")
