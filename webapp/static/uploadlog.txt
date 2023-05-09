@@ -1218,3 +1218,84 @@ SO927             1
 V19263366         6
 V830033882        7
 V890116150       51
+Revisar AR-20221566 corte: 1
+Revisar AR-20221529 corte: 1
+Revisar AR-20222206 corte: 1
+Revisar AR-20221446 corte: 1
+Revisar AR-20221528 corte: 1
+Revisar AR-20221466 corte: 1
+Revisar AR-20221607 corte: 1
+Revisar AR-20221488 corte: 2
+Revisar AR-20222577 corte: 1
+Revisar AR-20221526 corte: 1
+Revisar AR-20221467 corte: 1
+Revisar AR-20221451 corte: 1
+Revisar AR-20221556 corte: 1
+Revisar AR-20222419 corte: 1
+Revisar AR-20222033 corte: 1
+Revisar AR-20221793 corte: 1
+Revisar AR-20221799 corte: 1
+Revisar AR-20221663 corte: 1
+Revisar AR-20221465 corte: 1
+Revisar AR-20222461 corte: 1
+Revisar AR-20221623 corte: 1
+Revisar AR-20222045 corte: 1
+Revisar AR-20221546 corte: 1
+Revisar AR-20222128 corte: 1
+Revisar AR-20221525 corte: 1
+Revisar AR-20222207 corte: 1
+Revisar AR-20221498 corte: 1
+Revisar AR-20221694 corte: 1
+Revisar AR-20221551 corte: 1
+Revisar AR-20221438 corte: 2
+Revisar AR-20221459 corte: 1
+Revisar AR-20221772 corte: 1
+Revisar AR-20221613 corte: 1
+Revisar AR-20222561 corte: 1
+Revisar AR-20221611 corte: 1
+Revisar AR-20221883 corte: 1
+Revisar AR-20221566 corte: 1
+Revisar AR-20221529 corte: 1
+Revisar AR-20222206 corte: 1
+Revisar AR-20221446 corte: 1
+Revisar AR-20221528 corte: 1
+Revisar AR-20221466 corte: 1
+Revisar AR-20221607 corte: 1
+Revisar AR-20221488 corte: 2
+Revisar AR-20222577 corte: 1
+Revisar AR-20221526 corte: 1
+Revisar AR-20221467 corte: 1
+Revisar AR-20221451 corte: 1
+Revisar AR-20221556 corte: 1
+Revisar AR-20222419 corte: 1
+Revisar AR-20222033 corte: 1
+Revisar AR-20221793 corte: 1
+Revisar AR-20221799 corte: 1
+Revisar AR-20221663 corte: 1
+Revisar AR-20221465 corte: 1
+Revisar AR-20222461 corte: 1
+Revisar AR-20221623 corte: 1
+Revisar AR-20222045 corte: 1
+Revisar AR-20221546 corte: 1
+Revisar AR-20222128 corte: 1
+Revisar AR-20221525 corte: 1
+Revisar AR-20222207 corte: 1
+Revisar AR-20221498 corte: 1
+Revisar AR-20221694 corte: 1
+Revisar AR-20221551 corte: 1
+Revisar AR-20221438 corte: 2
+Revisar AR-20221459 corte: 1
+Revisar AR-20221772 corte: 1
+Revisar AR-20221613 corte: 1
+Revisar AR-20222561 corte: 1
+Revisar AR-20221611 corte: 1
+Revisar AR-20221883 corte: 1
+Revisar CO-20220114 corte: 1
+Revisar CO-20220114 corte: 2
+Revisar CO-20220114 corte: 3
+Vinculacion ejecutada en: 05/09/2023, 09:35:46
+Acuerdos Vinculados: 502 acuerdo :CO-20220083
+Tiempo: 231.02564930915833
+Vinculacion ejecutada en: 05/09/2023, 09:40:02
+Acuerdos Vinculados: 430 acuerdo :CO-20220083
+Tiempo: 201.62752723693848

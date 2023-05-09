@@ -222,7 +222,8 @@ def acuerdos_guardar():
     result=cur.fetchone()
 
     if result != None:
-        mensaje = "Este cliente ya tiene acuerdos vigentes"
+        mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result)
+        print(mensaje)
         return mensaje
 
     msql = "INSERT INTO dt_acuerdo "
@@ -435,12 +436,12 @@ def cliente_adicional(idconsultor, usuario, pais,idacuerdo):
 def cliente_adicional_guardar(idconsultor, usuario, pais,idacuerdo,idcliente,cliente):
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
-    msql = "SELECT idcliente, idacuerdo FROM dt_acuerdo where idcliente = '" + idcliente + "' and vigente = 1 union all  select idcliente, idacuerdo from dt_cliente_multiple where idcliente = '" + idcliente + "' and vigente = 1 order by idacuerdo asc"
-    print(msql)
-    cur.execute(msql)
+    msql = "SELECT idcliente, idacuerdo FROM dt_acuerdo where idcliente = %s and vigente = 1 union " \
+           "select idcliente, idacuerdo from dt_acuerdo where idacuerdo in (select idacuerdo from dt_cliente_multiple where idcliente = %s) and vigente = 1 order by idacuerdo asc"
+    cur.execute(msql,(idcliente,idcliente))
     result=cur.fetchone()
     if result != None:
-        mensaje = "Este cliente ya tiene acuerdos vigentes"
+        mensaje = "Este cliente ya tiene acuerdos vigentes: " + str(result[1])
         return mensaje
 
     print('sigio')
@@ -1093,7 +1094,8 @@ def totalizar_ventas(idacuerdo):
             #checkeo de total
             checkeo = 0
             for p in productos:
-                checkeo = checkeo + p[1]
+                if p[0] != "BOTOX 50U" or p[0] != "0":
+                    checkeo = checkeo + p[1]
 
                 #if p[0] == "BOTOX" or p[0] == "BOTOX 100U" or p[0] == "BOTOX 50U" or p[0] == "BOTOX 1 Vial (100 Units) A":
                 if p[0] == "BOTOX" or p[0] == "BOTOX 100U" or p[0] == "BOTOX 1 Vial (100 Units) A":

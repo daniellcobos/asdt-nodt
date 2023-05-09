@@ -1,5 +1,5 @@
 # Programa de Administracion
-from flask import Flask, flash, jsonify, redirect, url_for, session, send_file, g, send_from_directory
+from flask import Flask,  flash, jsonify, redirect, url_for, session, send_file, g
 import psycopg2
 from flask import render_template
 from flask import request
@@ -13,7 +13,7 @@ from xlsxwriter import Workbook
 import smtplib, ssl
 from email.mime.text import MIMEText
 import psycopg2.extras
-import time
+
 from webapp import app
 
 app.config.from_object('configuraciones.local')
@@ -215,17 +215,10 @@ def importar_ventas():
     mensaje = "Sin procesar"        
     uploaded_file = request.files['file']
     archivo = os.path.join(app.root_path, 'static/uploads/' , uploaded_file.filename)
-    archivolog = os.path.join(app.root_path, 'static/', "uploadlog.txt")
     if uploaded_file.filename != '':
         archivo = uploaded_file.save(archivo)
         df = pd.read_excel(os.path.join(app.root_path, 'static/uploads/' , uploaded_file.filename), sheet_name= 0 , engine='openpyxl')
-        #Numero de clientes de ventas, para el reporte
-        nc = str(df["sap_id"].nunique())
         df = df.fillna(0)
-        #numero de ventas por cliente para el reporte
-        df2 = df.groupby(['sap_id'])['cantidad'].sum().to_string()
-        cansum = df['cantidad'].sum()
-        print(cansum)
         dt = df.to_numpy()
         conn = psycopg2.connect(db_connection_string)
         cur = conn.cursor()
@@ -252,13 +245,9 @@ def importar_ventas():
             mensaje = ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion)
             i = i + 1
         
-        # Determina a que acuerdo esta una venta
-        #ventasxacuerdos1(session['pais'])
-        with open(archivolog, "a+") as log:
-            log.write("Cantidad de Clientes: " + nc + " Ventas: "+ str(cansum) + " Pais: "+ session['pais']  + "Fecha: "+ datetime.now().strftime("%m/%d/%Y, %H:%M:%S") +"\n" )
-            log.write("Ventas por SAP" +"\n"  )
-            log.write(df2)
-            log.write("\n")
+        # Determina a aque acuerdo esta una venta
+        ventasxacuerdos1(session['pais'])
+
     mensaje = 'Ok, importado'
 
     return mensaje
@@ -350,16 +339,13 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
   conn.close() 
 
 
-
 @app.route('/ventasxacuerdos1/<string:pais>', methods=['GET',"POST"])
 @app.route('/ventasxacuerdos1/<string:pais>', methods=['GET',"POST"])
 def ventasxacuerdos1(pais):
-    start = time.time()
-    archivolog = os.path.join(app.root_path, 'static/', "uploadlog.txt")
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
 
-    msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' and aprobado <> '3'"
+    msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' "
     cur.execute(msql)
 
     row = cur.fetchall()
@@ -370,16 +356,10 @@ def ventasxacuerdos1(pais):
     for index, row in df2.iterrows():
         idacuerdo = row.iloc[0]
         pcd_identificar_ventaxacuerdo(idacuerdo)
-        message = str(index) + " acuerdo :" + str(idacuerdo)
-        print(message)
+        print(str(index) + " acuerdo :" + str(idacuerdo))
 
     cur.close()
-    conn.close()
-    end = time.time()
-    with open(archivolog, "a+") as log:
-        log.write("Vinculacion ejecutada en: "+ datetime.now().strftime("%m/%d/%Y, %H:%M:%S") +"\n")
-        log.write("Acuerdos Vinculados: " + message +"\n")
-        log.write("Tiempo: " + str(end - start) +"\n")
+    conn.close() 
 
     return "Termino"
 
@@ -511,7 +491,7 @@ def importar_precios():
     return 'Ok, importado'
 
 def precios_insertar(producto, idproducto, periodo, precio_lista, precio, pais):
-    msql = "INSERT INTO dt_precios"
+    msql = "INSERT INTO dt_precios "
     msql = msql + "(producto,idproducto,periodo,precio_lista,precio,pais)"
     msql = msql + " VALUES ('" +  producto + "','"  + idproducto + "','" + periodo + "','"  + precio_lista + "','"  + precio + "','"  + pais + "')"
     mensaje = ""
@@ -692,48 +672,3 @@ def sistema():
         return render_template('parametros/sistema.html')
     else:
          return redirect('/misacuerdos')
-
-@app.route('/metricas')
-def metricas():
-    archivolog = os.path.join(app.root_path, 'static/', "informelog.txt")
-    conn = psycopg2.connect(db_connection_string)
-    cur = conn.cursor()
-    msql = "select venta_ano,venta_mes,sum(cantidad) from dt_ventas where pais = %s group by venta_mes,venta_ano order by venta_ano, venta_mes;"
-    cur.execute(msql, (session['pais'],))
-    df = pd.DataFrame(cur.fetchall(), columns=["Año","Mes","Cantidad"])
-    msql = "select venta_ano,venta_mes,sum(cantidad) from dt_ventas where pais = %s and idacuerdo <> '' group by venta_mes,venta_ano order by venta_ano, venta_mes;"
-    cur.execute(msql, (session['pais'],))
-    df2 = pd.DataFrame(cur.fetchall(), columns=["Año","Mes","Cantidad"])
-    msql = "select ano_ini,mes_ini,count(idacuerdo) from dt_acuerdo where vigente = 1 and pais=%s group by mes_ini,ano_ini order by ano_ini, mes_ini;"
-    cur.execute(msql, (session['pais'],))
-    df3 = pd.DataFrame(cur.fetchall(), columns=["Año","Mes","Cantidad"])
-    msql = "select ano_ini,mes_ini,count(idacuerdo) from dt_acuerdo where vigente = 1 and pais=%s and idacuerdo in (select dt_ventas.idacuerdo from dt_ventas) group by mes_ini,ano_ini order by ano_ini, mes_ini;"
-    cur.execute(msql, (session['pais'],))
-    df4 = pd.DataFrame(cur.fetchall(), columns=["Año","Mes","Cantidad"])
-    msql = "select count(*) from dt_liberacion where pais = %s;"
-    cur.execute(msql, (session['pais'],))
-    n1 = cur.fetchone()
-    msql = "select count(*) from dt_liberacion where pais = %s and idacuerdo in (select dt_acuerdo.idacuerdo  from dt_acuerdo where vigente = 1);"
-    cur.execute(msql, (session['pais'],))
-    n2 = cur.fetchone()
-    df.to_excel("v1.xlsx")
-    df2.to_excel("v2.xlsx")
-    df3.to_excel("v3.xlsx")
-    df4.to_excel("v4.xlsx")
-    with open(archivolog, "w+") as log:
-            log.write("Cantidad de ventas por mes: \n" )
-            log.write(df.to_string() + "\n")
-            log.write("Cantidad de ventas por mes vinculadas a un acuerdo:" +"\n"  )
-            log.write(df2.to_string() + "\n")
-            log.write("Cantidad de acuerdos activos por mes:" +"\n")
-            log.write(df3.to_string() + "\n")
-            log.write("Cantidad de acuerdos activos por mes vinculados a una venta:" + "\n")
-            log.write(df4.to_string() + "\n")
-            log.write("Liberaciones totales: " + str(n1[0])+ "\n")
-            log.write("Liberaciones totales activas: " + str(n2[0]) + "\n")
-            log.write("\n")
-    folder = os.path.join(app.root_path, "static")
-    try:
-        return send_from_directory(path=archivolog, directory=folder, filename="informelog.txt")
-    except:
-        return redirect('/misacuerdos')

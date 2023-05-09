@@ -58,7 +58,7 @@ Cantidad de acuerdos activos por mes:
 1  2022   12         4
 2  2023    1        27
 3  2023    2        15
-4  2023    3       538
+4  2023    3       535
 5  2023    4         1
 Cantidad de acuerdos activos por mes vinculados a una venta:
     Año  Mes  Cantidad
@@ -66,7 +66,7 @@ Cantidad de acuerdos activos por mes vinculados a una venta:
 1  2022   12         4
 2  2023    1        23
 3  2023    2        14
-4  2023    3       400
+4  2023    3       397
 Liberaciones totales: 8367
-Liberaciones totales activas: 1757
+Liberaciones totales activas: 1751
 

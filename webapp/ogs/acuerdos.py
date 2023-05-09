@@ -92,7 +92,7 @@ def acuerdosdetalle(idconsultor, usuario, pais):
         row2.append(t2)
         row2.append(t3)
         mdata.append(row2)
-       
+
     cur.close()
     conn.close()
     return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais)
@@ -134,33 +134,12 @@ def acuerdosdetalle_exportar(idconsultor):
 def acuerdossubdetalle(idacuerdo):
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
-    msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, dl.banda, dl.banda_min, dl.banda_max, dl.cantidad_periodo, dl.periodo ,  da.porc_descuento  from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where da.idacuerdo = '" + idacuerdo + "' order by dl.idacuerdo,dl.corte"
+    msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, da.cantidad_periodo from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where da.idacuerdo = '" + idacuerdo + "' order by dl.idacuerdo,dl.corte"
     cur.execute(msql)
     data = cur.fetchall() 
     cur.close()
     conn.close()  
-    arr = []
-    for t in data:
-        arr.append(t)  
-       
-       
-            
-    arr = np.array(arr)  
-    for t in arr:
-        for i,x in enumerate(t):
-             if x == None:
-                t[i] = ''
-        t[35] = round(float(t[35]),2)
-    
-
-    altarr = []
-    for row in arr:
-        reorderedRoW = [row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[33], row[9], row[12], row[10]
-        , row[11], row[21], round(row[35] * 100,2), row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20], row[22], row[23]
-        , row[24], row[25], row[26], row[27], row[28], row[29], row[30], row[31], row[32],row[34]]
-        altarr.append(reorderedRoW)
-    
-    return render_template('reportes/liberaciones_total.html', data1 = altarr)
+    return render_template('reportes/liberaciones_total.html', data = data)
 
 
 @app.route('/acuerdos_add/<string:idconsultor>/<string:usuario>/<string:pais>', methods=['GET'])
@@ -181,9 +160,10 @@ def acuerdos_add(idconsultor, usuario, pais):
     cur.execute(msql)
     id_max = cur.fetchall() 
     # Envia la tabla maestra de acuerdos
-    msql = "select * from dt_freegood where pais = '" + pais + "' and usar = 1 order by idfreegood "
+    msql = "select * from dt_freegood where pais = '" + pais + "' and usar = 1 order by idbanda "
     cur.execute(msql)
     freegoods = cur.fetchall() 
+    print(freegoods)
     # Envia la tabla maestra de acuerdos
     msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "' order by idplazo"
     cur.execute(msql)
@@ -235,10 +215,12 @@ def acuerdos_guardar():
     msql = msql + " order by idacuerdo asc"
     cur.execute(msql)
     df = cur.fetchall()
-
-    msql = "SELECT idcliente, idacuerdo FROM dt_acuerdo where idcliente = '" + idcliente[0] + "' and vigente = 1 union select idcliente, idacuerdo from dt_cliente_multiple where idcliente = '" + idcliente[0] + "' and vigente = 1 order by idacuerdo asc"
-    cur.execute(msql)
+    #revisa acuerdos vigentes en la tabla de acuerdos
+    msql = "SELECT idcliente, idacuerdo FROM dt_acuerdo where idcliente = %s and vigente = 1 union " \
+           "select idcliente, idacuerdo from dt_acuerdo where idacuerdo in (select idacuerdo from dt_cliente_multiple where idcliente = %s) and vigente = 1 order by idacuerdo asc"
+    cur.execute(msql, (idcliente[0], idcliente[0]))
     result=cur.fetchone()
+
     if result != None:
         mensaje = "Este cliente ya tiene acuerdos vigentes"
         return mensaje
@@ -284,7 +266,7 @@ def acuerdos_editar(idacuerdo):
     cur.execute(msql)
     registro = cur.fetchone() 
     # Envia la tabla maestra de acuerdos
-    msql = "select * from dt_freegood where pais = '" + session['pais'] + "' order by idfreegood"
+    msql = "select * from dt_freegood where pais = '" + session['pais'] + "' and usar = 1 order by idbanda"
     cur.execute(msql)
     freegoods = cur.fetchall() 
     # Envia la tabla maestra de acuerdos
@@ -463,7 +445,7 @@ def cliente_adicional_guardar(idconsultor, usuario, pais,idacuerdo,idcliente,cli
 
     print('sigio')
 
-    msql = "INSERT INTO dt_cliente_multiple(idacuerdo, cliente, idcliente) 	VALUES ('" + idacuerdo + "','" + cliente + "','" + idcliente + "')"
+    msql = "INSERT INTO dt_cliente_multiple(idacuerdo, cliente, idcliente,vigente) 	VALUES ('" + idacuerdo + "','" + cliente + "','" + idcliente + "','" + str(1) +"')"
     try:    
         cur.execute(msql)
         conn.commit()
@@ -505,10 +487,31 @@ def todosacuerdos():
         msql =  "SELECT * FROM dt_acuerdo where pais = '" + session['pais'] + "'"
         #msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, da.cantidad_periodo from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' order by dl.idacuerdo,dl.corte"
     cur.execute(msql)
-    data = cur.fetchall()   
+    data = cur.fetchall()
+    archivequantity = []
+    for r in data:
+        path = os.path.join(app.config['UPLOAD_FOLDER'], r[0])
+        try:
+            archivequantity.append(len(os.listdir(path)))
+        except:
+            archivequantity.append(0)
+    # precios
+    msql = "SELECT * FROM dt_precios where pais = %s order by periodo desc"
+    cur.execute(msql, (session['pais'],))
+    precios = []
+    for e in cur.fetchall():
+        precios.append(list(e))
+    msql = "Select distinct producto from dt_precios where pais = %s"
+    cur.execute(msql, (session['pais'],))
+    nombres = []
+    for e in cur.fetchall():
+        nombres.append(list(e))
     cur.close()
     conn.close()
-    return render_template('acuerdos/todosacuerdos.html', data = data)
+
+    return render_template('acuerdos/todosacuerdos.html', data=data, precios=precios, nombres=nombres,
+                           aq=archivequantity)
+
 
 @app.route('/todosacuerdos_edit/', methods=['POST'])
 def todosacuerdos_edit():    
@@ -769,13 +772,26 @@ def Recalcular_Sistema():
 def borrar_liberaciones():
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
-    print('aca')
-    msql =  "DELETE FROM dt_liberacion where pais = '" +  session['pais'] + "'"
-    cur.execute(msql)        
+    msql =  "Delete FROM dt_liberacion where pais = %s and dt_liberacion.idacuerdo in (select dt_acuerdo.idacuerdo from dt_acuerdo where vigente=1)"
+    #msql = "Delete FROM dt_liberacion where pais = %s and idacuerdo =  'CO-20220249'"
+    cur.execute(msql,(session['pais'],))
     conn.commit()
     cur.close()
     conn.close()    
-    return "Liberaciones actuales borradas." 
+    return "Liberaciones actuales borradas."
+
+
+@app.route('/borrar_liberaciones_totales/', methods=['POST'])
+def borrar_liberaciones_totales():
+    conn = psycopg2.connect(db_connection_string)
+    cur = conn.cursor()
+    msql =  "DELETE FROM dt_liberacion where pais = '" +  session['pais'] + "'"
+    cur.execute(msql)
+    conn.commit()
+    cur.close()
+    conn.close()
+    return "Liberaciones actuales borradas."
+
 
 @app.route('/crear_liberaciones/', methods=['POST'])
 def crear_liberaciones():
@@ -783,6 +799,7 @@ def crear_liberaciones():
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()  
     msql =  "SELECT * from dt_acuerdo where pais = '" +  session['pais']  + "' and vigente = 1 "
+    #msql = "SELECT * from dt_acuerdo where pais = '" +  session['pais']  + "' and idacuerdo = 'CO-20220249'"
     rows = pd.read_sql_query(msql,conn)
     for i in rows.index:      
         idacuerdo = rows['idacuerdo'][i]
@@ -791,7 +808,25 @@ def crear_liberaciones():
     cur.close()
     conn.close() 
 
-    return "Liberaciones actuales creadas." 
+    return "Liberaciones actuales creadas."
+
+
+@app.route('/crear_liberaciones_totales/', methods=['POST'])
+def crear_liberaciones_totales():
+
+    conn = psycopg2.connect(db_connection_string)
+    cur = conn.cursor()
+    msql =  "SELECT * from dt_acuerdo where pais = '" +  session['pais']  + "'"
+    rows = pd.read_sql_query(msql,conn)
+    for i in rows.index:
+        idacuerdo = rows['idacuerdo'][i]
+        crear_liberacion(rows['idacuerdo'][i], rows['idconsultor'][i] , rows['consultor'][i], rows['idcliente'][i], rows['cliente'][i], rows['mes_ini'][i], rows['ano_ini'][i], rows['tipo_acuerdo'][i], rows['cantidad_periodo'][i], rows['duracion'][i], rows['unidades_total'][i], rows['banda'][i], rows['freegoods'][i], rows['mes_fin'][i], rows['ano_fin'][i], rows['vigente'][i], rows['pais'][i], rows['num_entregas'][i], rows['num_entregas_cierre'][i], rows['anulado'][i], rows['entrega_x_porcentaje'][i], rows['porc_piso_entrega'][i] , rows['porc_cumplimiento'][i] , rows['fgs_sobre_cien'][i]  , rows['porc_descuento'][i] , rows['aprobado'][i])
+
+    cur.close()
+    conn.close()
+
+    return "Liberaciones actuales creadas."
+
 
 def insertar_liberacion(periodo, pais, idacuerdo, consultor, idcliente, cliente, duracion , corte, detalle_periodo , mes_entrega , ano_entrega, meta_corte, fgs_sobre_cien, fgs_teoricos, cumplimiento, botox, ultra, ultra_plus, volbella, volift, volite, voluma, volux, total_venta, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4):
     conn = psycopg2.connect(db_connection_string)
@@ -801,12 +836,13 @@ def insertar_liberacion(periodo, pais, idacuerdo, consultor, idcliente, cliente,
     msql = msql + ", '" + str(idacuerdo) +"', '" + str(consultor) +"', '" + str(idcliente) +"', '" + str(cliente) +"', " + str(duracion) +", '" + str(corte) + "','" + str(detalle_periodo) + "', '" + str(mes_entrega) + "', " + str(ano_entrega) + ", " + str(meta_corte) + ", " + str(fgs_sobre_cien) + ", " + str(fgs_teoricos)
     msql = msql + ", "  + str(cumplimiento) +", "+ str(botox) +", "+ str(ultra) +", "+ str(ultra_plus) +", "+ str(volbella) +", "+ str(volift) +", "+ str(volite) +", "+ str(voluma) +", "+ str(volux) +", "+ str(total_venta)
     msql = msql + ", '" + str(idcliente1) +"', '"+ str(cliente1) +"', '"+ str(idcliente2) +"', '"+ str(cliente2) +"', '"+ str(idcliente3) + "', '"+ str(cliente3) +"', '"+ str(idcliente4) + "', '"+ str(cliente4) +"'); "
-    print(msql)
+    #print(msql)
     cur.execute(msql)
     conn.commit()
     cur.close()
     conn.close()    
     return "ok" 
+
 
 @app.route('/ventasxacuerdos/', methods=['GET'])
 def ventasxacuerdos():
@@ -887,25 +923,28 @@ def ventasxacuerdos():
     conn.close()   
     return "Clientes por Acuerdos por Ventas"    
 
-
+# Esta es la rutina que asigna los fg 2022.06.01
 @app.route('/consolidar/', methods=['GET','POST'])
 def consolidar():
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
 
-    ventasxacuerdos()
+    #ventasxacuerdos()
 
-    # Extrae los acuerdos que tienen ventas
+    # Extrae los acuerdos que tienen ventas y estan vigentes
     pais =  session['pais']    
-    msql = "SELECT DISTINCT idacuerdo from dt_ventas WHERE PAIS = '"+ pais +"' and idacuerdo <> ''"
-    #msql = "SELECT DISTINCT idacuerdo from dt_ventas WHERE PAIS = '"+ pais +"' and idacuerdo =  'CO-20210003' "
-    cur.execute(msql)
+    msql = "SELECT DISTINCT dt_ventas.idacuerdo from dt_ventas  WHERE PAIS = %s and dt_ventas.idacuerdo <> ''" \
+          " and dt_ventas.idacuerdo in (select dt_acuerdo.idacuerdo from dt_acuerdo where vigente = 1)"
+    #msql = "SELECT DISTINCT idacuerdo from dt_ventas WHERE PAIS = '"+ pais +"' and idacuerdo =  'CO-20220008' "
+    cur.execute(msql, (pais,))
     df = cur.fetchall()
+    print(df)
     i = 0
     for row in df:
         msql = "SELECT * from dt_acuerdo where idacuerdo = '" + str(row[0]) + "' and PAIS = '"+ pais +"' order by idacuerdo"
-        #msql = "SELECT * from dt_acuerdo where idacuerdo = '" + str(row[0]) + "' and PAIS = '"+ pais +"' and idacuerdo =  'CO-20210003' order by idacuerdo"
+        #msql = "SELECT * from dt_acuerdo where idacuerdo = '" + str(row[0]) + "' and PAIS = '"+ pais +"' and idacuerdo =  'CO-20220249' order by idacuerdo"
         cur.execute(msql)
+        print(msql)
         dt = cur.fetchone()
         idacuerdo = row[0]
         i = i + 1
@@ -914,6 +953,33 @@ def consolidar():
     conn.close()     
     return 'Consolidacion completa!!!'  
 
+
+@app.route('/consolidar_total/', methods=['GET','POST'])
+def consolidar_total():
+    conn = psycopg2.connect(db_connection_string)
+    cur = conn.cursor()
+
+    #ventasxacuerdos()
+
+    # Extrae los acuerdos que tienen ventas
+    pais =  session['pais']
+    msql = "SELECT DISTINCT idacuerdo from dt_ventas WHERE PAIS = '"+ pais +"' and idacuerdo <> ''"
+    cur.execute(msql)
+    df = cur.fetchall()
+    #print(df)
+    i = 0
+    for row in df:
+        msql = "SELECT * from dt_acuerdo where idacuerdo = '" + str(row[0]) + "' and PAIS = '"+ pais +"' order by idacuerdo"
+        cur.execute(msql)
+        dt = cur.fetchone()
+        idacuerdo = row[0]
+        i = i + 1
+        totalizar_ventas(idacuerdo)
+    cur.close()
+    conn.close()
+    return 'Consolidacion completa!!!'
+
+
 @app.route('/totalizar_ventas/<string:idacuerdo>', methods=['GET','POST'])
 def totalizar_ventas(idacuerdo):
     conn = psycopg2.connect(db_connection_string)
@@ -921,24 +987,28 @@ def totalizar_ventas(idacuerdo):
     # Trae los datos de liberacion
     msql = "SELECT * from dt_liberacion where idacuerdo = '" + idacuerdo + "'" 
     cur.execute(msql)
-    cortes = cur.fetchall() 
-
+    cortes = cur.fetchall()
+    # Ultimo corte
+    lastcorte = len(cortes) - 1
+    mtotal = 0
+    # Acomulado por corte
+    mtotalac= 0
     # Totaliza por cada corte pero el cierre es la sumatoria de los cortes precedentes
     for row in cortes:
 
         periodo = str(row[1])
         porcentaje = row[13] / 100
-        print(porcentaje)
+        #print(porcentaje)
         f1 = periodo[0:6]
         f2 = periodo[6:12]
-
+        bigger = 0
         corte = row[8]
         if (corte != 'Cierre'):
             # Calcula las ventas del periodo
             msql = "SELECT producto, sum(cantidad) from dt_ventas WHERE idperiodo BETWEEN " + str(f1) + " AND " + str(f2) + " AND idacuerdo = '" + idacuerdo + "' and PRODUCTO <> 'LATISSE' GROUP BY producto;"
             print(msql)
             cur.execute(msql)
-            productos = cur.fetchall() 
+            productos = cur.fetchall()
             q1 = 0
             q2 = 0
             q3 = 0
@@ -946,7 +1016,8 @@ def totalizar_ventas(idacuerdo):
             q5 = 0
             q6 = 0
             q7 = 0
-            q8 = 0      
+            q8 = 0
+            q9 = 0
             p1 = 0
             p2 = 0
             p3 = 0
@@ -954,11 +1025,13 @@ def totalizar_ventas(idacuerdo):
             p5 = 0
             p6 = 0
             p7 = 0
-            p8 = 0   
+            p8 = 0
+            p9 = 0
             mtotal = 0 
             for p in productos:
-                #if p[0] == "BOTOX" or p[0] == "BOTOX 100U" or p[0] == "BOTOX 50U":
-                if p[0] == "BOTOX" or p[0] == "BOTOX 100U":
+
+                #if p[0] == "BOTOX" or p[0] == "BOTOX 100U" or p[0] == "BOTOX 50U" or p[0] == "BOTOX 1 Vial (100 Units) A":
+                if p[0] == "BOTOX" or p[0] == "BOTOX 100U" or p[0] == "BOTOX 1 Vial (100 Units) A":
                     q1 = q1 + round(p[1])
                 if p[0] == "ULTRA":
                     q2 = round(p[1])
@@ -974,20 +1047,77 @@ def totalizar_ventas(idacuerdo):
                     q7 = round(p[1])
                 if p[0] == "VOLUX":
                     q8 = round(p[1])
+                if p[0] == "HARMONYCA":
+                    q9 = round(p[1])
             
-            mventa = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8))
- 
-            mtotal = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8)*porcentaje)
+            mventa = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9))
 
-            p1 = round(q1 * porcentaje)
-            p2 = round(q2 * porcentaje)
-            p3 = round(q3 * porcentaje)
-            p4 = round(q4 * porcentaje)
-            p5 = round(q5 * porcentaje)
-            p6 = round(q6 * porcentaje)
-            p7 = round(q7 * porcentaje)
-            p8 = round(q8 * porcentaje)
-            
+            mtotal = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9)*porcentaje)
+            #print(mtotal)
+            mtotalac = mtotalac + ((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9) * porcentaje)
+            if mventa > 0:
+                p1 = round(((q1/mventa)* mtotal) + 0.01)
+                p2 = round(((q2/mventa)*mtotal) + 0.01)
+                p3 = round(((q3/mventa)*mtotal) + 0.01)
+                p4 = round(((q4/mventa)*mtotal) + 0.01)
+                p5 = round(((q5/mventa)*mtotal) + 0.01)
+                p6 = round(((q6/mventa)*mtotal) + 0.01)
+                p7 = round(((q7/mventa)*mtotal) + 0.01)
+                p8 = round(((q8/mventa)*mtotal) + 0.01)
+                p9 = round(((q9/mventa) * mtotal) + 0.01)
+                pventas = {"botox": (q1 / mventa) * mtotal, "ultra": (q2 / mventa) * mtotal,
+                           "ultra_plus": (q3 / mventa) * mtotal, "volbella": (q4 / mventa) * mtotal,
+                           "volift": (q5 / mventa) * mtotal, "volite": (q6 / mventa) * mtotal,
+                           "voluma": (q7 / mventa) * mtotal, "volux": (q8 / mventa) * mtotal,
+                           "harmonyca":(q9/mventa) * mtotal
+                           }
+                pventas = sorted(pventas.items(), key=lambda item: item[1])
+                #print(pventas)
+                for venta in pventas:
+                    if venta[1] < 0.5:
+                        pass
+                    else:
+                        lower = venta[0]
+                        break
+                mtotal2 = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8
+
+                if (mtotal < mtotal2):
+                    if lower == "botox":
+                        p1 = p1 - 1
+                    if lower == "ultra":
+                        p2 = p2 - 1
+                    if lower == "ultra_plus":
+                        p3 = p3 - 1
+                    if lower == "volbella":
+                        p4 = p4 - 1
+                    if lower == "volift":
+                        p5 = p5 - 1
+                    if lower == "volite":
+                        p6 = p6 - 1
+                    if lower == "voluma":
+                        p7 = p7 - 1
+                    if lower == "volux":
+                        p8 = p8 - 1
+                    if lower == "harmonyca":
+                        p9 = p9 - 1
+                    #print(p1, p2, p3, p4, p5, p6, p7, p8)
+            else:
+                p1 = 0
+                p2 = 0
+                p3 = 0
+                p4 = 0
+                p5 = 0
+                p6 = 0
+                p7 = 0
+                p8 = 0
+                p9 = 0
+
+
+
+            #print(porcentaje)
+
+
+
             if p1 <0:
                 p1 = 0
             if p2 <0:
@@ -1004,63 +1134,20 @@ def totalizar_ventas(idacuerdo):
                 p7 = 0
             if p8 <0:
                 p8 = 0
-                    
-            mtotal2 = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8
-
-            diferencia = mtotal2 - mtotal
-            unidad = 0
-            if diferencia > 0:
-                unidad = -1
-            if diferencia < 0:
-                unidad = 1
-
-            if q1 > 0  and diferencia != 0 and p1 + unidad > 0 :
-                p1 = p1 + unidad                
-                diferencia = diferencia + unidad    
-
-            if q2 > 0 and diferencia != 0 and p2 + unidad > 0 :
-                p2 = p2 + unidad
-                diferencia = diferencia + unidad
-        
-            if q3 > 0 and diferencia != 0 and p3 + unidad > 0 :
-                p3 = p3 + unidad
-                diferencia = diferencia + unidad   
-
-            if q4 > 0 and diferencia != 0 and p4 + unidad > 0 :
-                p4 = p4 + unidad
-                diferencia = diferencia + unidad     
-
-            if q5 > 0 and diferencia != 0 and p5 + unidad > 0 :
-                p5 = p5 + unidad
-                diferencia = diferencia + unidad   
-
-            if q6 > 0 and diferencia != 0 and p6 + unidad > 0 :
-                p6 = p6 + unidad
-                diferencia = diferencia + unidad  
-
-            if q7 > 0 and diferencia != 0 and p7 + unidad > 0 :
-                p7 = p7 + unidad
-                diferencia = diferencia + unidad                            
-
-            if q8 > 0 and diferencia != 0 and p8 + unidad > 0 :
-                p8 = p8 + unidad
-                diferencia = diferencia + unidad     
+            if p9 <0:
+                p9 = 0
+            print(p1, p2, p3, p4, p5, p6, p7, p8, p9)
 
 
-            if mtotal2 - mtotal != 0:
-                print("Diferencia de " + str(diferencia))
-            else:
-                print("Si diferencia")
-
-            msql = "UPDATE dt_liberacion SET total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and periodo = " + str(periodo)
+            msql = "UPDATE dt_liberacion SET total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ",harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and periodo = " + str(periodo)
             print(msql)
             cur.execute(msql)
             conn.commit()
         else:
             # Aqui se hace el cierre como la suma de todo el acuerdo
-            msql = "select sum(fgs_teoricos),sum(total_venta),sum(botox),sum(ultra),sum(ultra_plus),sum(volbella),sum(volift),sum(volite),sum(voluma),sum(volux),sum(total_fgs) from dt_liberacion where idacuerdo = '" + idacuerdo + "' and corte <> 'Cierre'"
+            msql = "select sum(fgs_teoricos),sum(total_venta),sum(botox),sum(ultra),sum(ultra_plus),sum(volbella),sum(volift),sum(volite),sum(voluma),sum(volux),sum(harmonyca),sum(total_fgs) from dt_liberacion where idacuerdo = '" + idacuerdo + "' and corte <> 'Cierre'"
             cur.execute(msql)
-            cierre = cur.fetchone() 
+            cierre = cur.fetchone()
             mteoricos = cierre[0]
             mventa = cierre[1]
             p1 = cierre[2]
@@ -1071,11 +1158,34 @@ def totalizar_ventas(idacuerdo):
             p6 = cierre[7]
             p7 = cierre[8]
             p8 = cierre[9]
-            mtotal = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8
-            msql = "UPDATE dt_liberacion SET fgs_teoricos = " + str(mteoricos) +  ", total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and corte = 'Cierre' "
+            p9 = cierre[10]
+            if p9 == None:
+                p9 = 0
+            mtotal = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9
+            #Obtiene el producto mas vendido
+            bigger = {"botox": p1, "ultra": p2 ,"ultra_plus": p3, "volbella": p4, "volift": p5, "volite": p6, "voluma": p7, "volux": p8, "harmonyca": p9}
+            print(bigger)
+            biggerone = max(bigger, key=bigger.get)
+            msql = "UPDATE dt_liberacion SET fgs_teoricos = " + str(mteoricos) +  ", total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ", harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and corte = 'Cierre' "
+
+            #log temporal
+
             cur.execute(msql)
             conn.commit()
         
+    mtotalac = round(mtotalac)
+    #Redondeo vs Suma en cierre
+    if mtotalac > mtotal:
+        msql = "UPDATE dt_liberacion set total_fgs= total_fgs+1 WHERE idacuerdo = %s and corte = %s"
+        cur.execute(msql, ( idacuerdo, str(lastcorte)))
+        msql = "UPDATE dt_liberacion set {field}= {field}+1 WHERE idacuerdo = %s and corte = %s".format(field=biggerone)
+        cur.execute(msql, (idacuerdo, str(lastcorte)))
+        # El Cierre tambien quedaba incompleto
+        msql = "UPDATE dt_liberacion set total_fgs= total_fgs+1 WHERE idacuerdo = %s and corte = %s"
+        cur.execute(msql, (idacuerdo, 'Cierre'))
+        msql = "UPDATE dt_liberacion set {field}= {field}+1 WHERE idacuerdo = %s and corte = %s".format(field=biggerone)
+        cur.execute(msql, (idacuerdo, 'Cierre'))
+        conn.commit()
 
     cur.close()
     conn.close()       
