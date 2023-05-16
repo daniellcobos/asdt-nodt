@@ -998,7 +998,7 @@ def consolidar_acuerdo(idacuerdor):
 
     # Extrae los acuerdos que tienen ventas y estan vigentes
     pais =  session['pais']
-    msql = "SELECT DISTINCT idacuerdo from dt_ventas WHERE PAIS = '"+ pais +"' and idacuerdo =  '"+ idacuerdor+"' "
+    msql = "SELECT DISTINCT idacuerdo from dt_ventas WHERE PAIS = '" + pais +"' and idacuerdo =  '"+ idacuerdor+"' "
     cur.execute(msql, (pais,))
     df = cur.fetchall()
     print(df)

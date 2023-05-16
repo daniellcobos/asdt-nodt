@@ -1299,3 +1299,29 @@ Tiempo: 231.02564930915833
 Vinculacion ejecutada en: 05/09/2023, 09:40:02
 Acuerdos Vinculados: 430 acuerdo :CO-20220083
 Tiempo: 201.62752723693848
+Revisar CO-20220344 corte: 1
+Revisar CO-20220165 corte: 2
+Revisar CO-20220137 corte: 3
+Revisar CO-20220240 corte: 1
+Revisar CO-20220100 corte: 1
+Revisar CO-20220192 corte: 2
+Revisar CO-20220044 corte: 1
+Revisar CO-20220044 corte: 2
+Revisar CO-20220112 corte: 3
+Revisar CO-20220195 corte: 1
+Revisar CO-20220114 corte: 1
+Revisar CO-20220114 corte: 2
+Revisar CO-20220114 corte: 3
+Revisar CO-20220344 corte: 1
+Revisar CO-20220165 corte: 2
+Revisar CO-20220137 corte: 3
+Revisar CO-20220240 corte: 1
+Revisar CO-20220100 corte: 1
+Revisar CO-20220192 corte: 2
+Revisar CO-20220044 corte: 1
+Revisar CO-20220044 corte: 2
+Revisar CO-20220112 corte: 3
+Revisar CO-20220195 corte: 1
+Revisar CO-20220114 corte: 1
+Revisar CO-20220114 corte: 2
+Revisar CO-20220114 corte: 3

@@ -15,6 +15,7 @@ from email.mime.text import MIMEText
 import psycopg2.extras
 import time
 from webapp import app
+from .informes import *
 
 app.config.from_object('configuraciones.local')
 db_connection_string = app.config["POSTGRESQL_CONNECTION"]
@@ -733,6 +734,8 @@ def metricas():
             log.write("Liberaciones totales activas: " + str(n2[0]) + "\n")
             log.write("\n")
     folder = os.path.join(app.root_path, "static")
+    print(vrf_acuerdos_multiples())
+    print(vrf_ventas_liberaciones())
     try:
         return send_from_directory(path=archivolog, directory=folder, filename="informelog.txt")
     except:
