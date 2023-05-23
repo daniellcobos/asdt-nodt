@@ -53,5 +53,12 @@ def vrf_ventas_liberaciones():
     cont1 = cur.fetchone()[0]
     cur.execute(msql2)
     cont2 = cur.fetchone()[0]
+    print(cont1,cont2)
     return cont1 - cont2
+
+@app.route('/verificaciones', methods=['GET'])
+def verificaciones():
+    vrf_am = vrf_acuerdos_multiples()
+    vrf_vl = vrf_ventas_liberaciones()
+    return render_template('parametros/verificaciones.html',vrf_am = vrf_am, vrf_vl = vrf_vl)
 

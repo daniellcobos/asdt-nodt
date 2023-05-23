@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block title %}Home {% endblock %}
+{% block head %}
+
+
+{{ super() }}
+{% endblock %}
+{% block content %}
+
+<div class="container">
+ <div class="row">
+     <ul class="list-group">Verificaciones:
+      <li class="list-group-item">Numero de clientes en multiples acuerdos: {{ vrf_am }}</li>
+
+     <li class="list-group-item">Diferencias entre ventas totales y liberaciones: {{ vrf_vl }}</li>
+     </ul>
+
+ </div>
+</div>
+
+
+{% endblock %}

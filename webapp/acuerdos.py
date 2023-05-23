@@ -1232,13 +1232,14 @@ def totalizar_ventas(idacuerdo):
             p9 = cierre[10]
             if p9 == None:
                 p9 = 0
+
             mtotal = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9
             #Obtiene el producto mas vendido
             bigger = {"botox": p1, "ultra": p2 ,"ultra_plus": p3, "volbella": p4, "volift": p5, "volite": p6, "voluma": p7, "volux": p8, "harmonyca": p9}
             print(bigger)
             biggerone = max(bigger, key=bigger.get)
             msql = "UPDATE dt_liberacion SET fgs_teoricos = " + str(mteoricos) +  ", total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ", harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and corte = 'Cierre' "
-
+            print(msql)
             #log temporal
 
             cur.execute(msql)

@@ -56,45 +56,44 @@ Cantidad de ventas por mes vinculadas a un acuerdo:
 23  2023    1      4471
 24  2023    2      4144
 25  2023    3      5938
-26  2023    4      5221
+26  2023    4      5231
 Cantidad de acuerdos activos por mes:
      Año  Mes  Cantidad
 0   2021   12         4
-1   2022    2         5
+1   2022    2         3
 2   2022    3         6
 3   2022    4         5
-4   2022    5        10
+4   2022    5         8
 5   2022    6         3
 6   2022    7         3
-7   2022    8        29
+7   2022    8        26
 8   2022    9        29
 9   2022   10        29
 10  2022   11        13
-11  2022   12         8
+11  2022   12         7
 12  2023    1        16
 13  2023    2        26
 14  2023    3        37
-15  2023    4        39
-16  2023    5        12
-17  2023   12         1
+15  2023    4        40
+16  2023    5        34
 Cantidad de acuerdos activos por mes vinculados a una venta:
      Año  Mes  Cantidad
 0   2021   12         4
-1   2022    2         5
+1   2022    2         3
 2   2022    3         6
 3   2022    4         5
-4   2022    5        10
+4   2022    5         8
 5   2022    6         3
 6   2022    7         3
-7   2022    8        29
+7   2022    8        26
 8   2022    9        29
 9   2022   10        29
 10  2022   11        13
-11  2022   12         8
+11  2022   12         7
 12  2023    1        16
-13  2023    2        26
+13  2023    2        25
 14  2023    3        37
 15  2023    4        32
-Liberaciones totales: 3485
-Liberaciones totales activas: 1911
+Liberaciones totales: 3667
+Liberaciones totales activas: 2009
 
