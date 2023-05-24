@@ -38,12 +38,13 @@ def vrf_acuerdos_multiples():
     cur.execute(msql)
     wrongs = len(cur.fetchall())
     print(wrongs)
+    conn.close()
     return wrongs
 
 def vrf_ventas_liberaciones():
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
-    if session['pais'] == 'AR':
+    if session['pais'] == 'AR' or session['pais'] == 'CO':
         msql1 = " select sum(total_venta) from dt_liberacion where corte ='Cierre' and idacuerdo in (select idacuerdo from dt_acuerdo where vigente = 1) and pais = 'AR'"
         msql2 = "select SUM(cantidad) from dt_ventas where idacuerdo in (select idacuerdo from dt_acuerdo where vigente = 1) and pais = 'AR' and producto <> 'LATISSE' and  producto <> '0'"
     elif session['pais'] == 'CO':
@@ -54,11 +55,55 @@ def vrf_ventas_liberaciones():
     cur.execute(msql2)
     cont2 = cur.fetchone()[0]
     print(cont1,cont2)
+    conn.close()
     return cont1 - cont2
+
+
+def cst_acuerdos():
+    conn = psycopg2.connect(db_connection_string)
+    cur = conn.cursor()
+    msql = "select count(idacuerdo) from dt_acuerdo where pais = %s"
+    cur.execute(msql, (session['pais'], ))
+    cont = cur.fetchone()[0]
+    conn.close()
+    return cont
+
+
+def cst_acuerdos_vigentes():
+    conn = psycopg2.connect(db_connection_string)
+    cur = conn.cursor()
+    msql = "select count(idacuerdo) from dt_acuerdo where vigente = 1 and pais = %s"
+    cur.execute(msql, (session['pais'],))
+    cont = cur.fetchone()[0]
+    conn.close()
+    return cont
+
+def cst_liberaciones():
+        conn = psycopg2.connect(db_connection_string)
+        cur = conn.cursor()
+        msql = "select count(*) from dt_liberacion where pais = %s;"
+        cur.execute(msql, (session['pais'],))
+        cont = cur.fetchone()[0]
+        conn.close()
+        return cont
+
+
+def cst_liberaciones_vigentes():
+    conn = psycopg2.connect(db_connection_string)
+    cur = conn.cursor()
+    msql = "select count(*) from dt_liberacion where pais = %s and idacuerdo in (select dt_acuerdo.idacuerdo  from dt_acuerdo where vigente = 1);"
+    cur.execute(msql, (session['pais'],))
+    cont = cur.fetchone()[0]
+    conn.close()
+    return cont
 
 @app.route('/verificaciones', methods=['GET'])
 def verificaciones():
+    cst_a = cst_acuerdos()
+    cst_av = cst_acuerdos_vigentes()
+    lb = cst_liberaciones()
+    lb_vgt = cst_liberaciones_vigentes()
     vrf_am = vrf_acuerdos_multiples()
     vrf_vl = vrf_ventas_liberaciones()
-    return render_template('parametros/verificaciones.html',vrf_am = vrf_am, vrf_vl = vrf_vl)
+    return render_template('parametros/verificaciones.html', vrf_am=vrf_am, vrf_vl=vrf_vl, cst_a=cst_a, cst_av=cst_av, lb=lb, lb_vgt=lb_vgt)
 

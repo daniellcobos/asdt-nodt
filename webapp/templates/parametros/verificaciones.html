@@ -9,13 +9,31 @@
 
 <div class="container">
  <div class="row">
-     <ul class="list-group">Verificaciones:
-      <li class="list-group-item">Numero de clientes en multiples acuerdos: {{ vrf_am }}</li>
-
-     <li class="list-group-item">Diferencias entre ventas totales y liberaciones: {{ vrf_vl }}</li>
+     <ul class="list-group">
+         Estadisticas:
+         <li class="list-group-item">
+             Numero de acuerdos: {{ cst_a }}
+         </li>
+         <li class="list-group-item">
+             Numero de acuerdos vigentes: {{ cst_av }}
+         </li>
+         <li class="list-group-item">
+             Numero de liberaciones: {{ lb }}
+         </li>
+         <li class="list-group-item">
+             Numero de liberaciones vigentes: {{ lb_vgt }}
+         </li>
      </ul>
 
+
  </div>
+<div class="row">
+      <ul class="list-group">Verificaciones:
+      <li class="list-group-item">Numero de clientes en multiples acuerdos: {{ vrf_am }}</li>
+
+     <li class="list-group-item">Diferencias entre liberaciones y ventas totales: {{ vrf_vl }}</li>
+     </ul>
+</div>
 </div>
 
 
