@@ -107,3 +107,12 @@ def verificaciones():
     vrf_vl = vrf_ventas_liberaciones()
     return render_template('parametros/verificaciones.html', vrf_am=vrf_am, vrf_vl=vrf_vl, cst_a=cst_a, cst_av=cst_av, lb=lb, lb_vgt=lb_vgt)
 
+@app.route('/checkventas', methods=['GET','POST'])
+def checkventas():
+    conn = psycopg2.connect(db_connection_string)
+    cur = conn.cursor()
+    msql = "select count(idventas) from dt_ventas where pais ='AR'"
+    cur.execute(msql)
+    ventasactuales = cur.fetchone()[0]
+    dif = ventasactuales - session["ventasIniciales"]
+    return str(dif)+"/"+str(session["currentUpload"])

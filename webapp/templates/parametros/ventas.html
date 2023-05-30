@@ -94,6 +94,7 @@
     });
 
     async function btn_importar(){
+        setInterval(()=> {poll()},25000)
 
       const { value: file } = await Swal.fire({
       title: 'Seleccione el archivo a imporar',
@@ -115,13 +116,19 @@
       
       let formData = new FormData();           
       formData.append("file", file);
+
+
+
+
       await fetch('/importar_ventas', {
         method: "POST", 
         body: formData,
-      }).then(response =>{ 
-        Swal.fire(response);
-        location.reload(); 
-      });  
+      }).then(response =>{
+         response.text().then((data) => {
+             Swal.fire(data);
+             setTimeout(location.reload(),4000);
+         })
+      })
 
 
       }      
@@ -174,6 +181,16 @@
 
       }
 
+     const poll = async() => {
+        await fetch('/checkventas').then(response => response.text()).then((data) => {
+            let text = 'Espere a que termine de importar. No cierre la ventana. Tomara unos minutos!!! \n Progreso:' + data
+            Swal.fire({
+                  icon: 'warning',
+        title: text,
+        showConfirmButton: false,
+            })
+        })
+      }
   </script>  
 
 <script>

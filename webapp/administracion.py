@@ -226,12 +226,20 @@ def importar_ventas():
         #numero de ventas por cliente para el reporte
         df2 = df.groupby(['sap_id'])['cantidad'].sum().to_string()
         cansum = df['cantidad'].sum()
-        print(cansum)
+        session["currentUpload"] = df.shape[0]
+
         dt = df.to_numpy()
         conn = psycopg2.connect(db_connection_string)
         cur = conn.cursor()
+        msql = "select count(idventas) from dt_ventas where pais ='AR'"
+        cur.execute(msql)
+        ventasactuales = cur.fetchone()[0]
+        session["ventasIniciales"] = ventasactuales
+        print(ventasactuales)
+
         i = 1
-        for row in dt:  
+        for row in dt:
+
             invoice_date = '1'
             idcliente = str(row[1])
             venta_mes = str(row[6])
@@ -255,14 +263,25 @@ def importar_ventas():
         
         # Determina a que acuerdo esta una venta
         #ventasxacuerdos1(session['pais'])
+        #calcular total ventas de nuevo
+        msql = "select count(idventas) from dt_ventas where pais ='AR'"
+        cur.execute(msql)
+        ventasactuales2 = cur.fetchone()[0]
+        print(ventasactuales2)
+        conn.close()
         with open(archivolog, "a+") as log:
             log.write("Cantidad de Clientes: " + nc + " Ventas: "+ str(cansum) + " Pais: "+ session['pais']  + "Fecha: "+ datetime.now().strftime("%m/%d/%Y, %H:%M:%S") +"\n" )
             log.write("Ventas por SAP" +"\n"  )
             log.write(df2)
             log.write("\n")
     mensaje = 'Ok, importado'
+    if ventasactuales2 - ventasactuales == df.shape[0]:
+        print(mensaje)
+        return mensaje
 
-    return mensaje
+    else:
+        print("e")
+        return "Hubo un problema con la carga"
         
 def ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion):
     msql = "INSERT INTO dt_ventas "
