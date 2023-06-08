@@ -44,13 +44,14 @@ def vrf_acuerdos_multiples():
 def vrf_ventas_liberaciones():
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
-    if session['pais'] == 'AR' or session['pais'] == 'CO':
-        msql1 = " select sum(total_venta) from dt_liberacion where corte ='Cierre' and idacuerdo in (select idacuerdo from dt_acuerdo where vigente = 1) and pais = 'AR'"
+    if session['pais'] == 'AR':
+        msql1 = " select sum(total_venta) from dt_liberacion where corte <>'Cierre' and idacuerdo in (select idacuerdo from dt_acuerdo where vigente = 1) and pais = 'AR'"
         msql2 = "select SUM(cantidad) from dt_ventas where idacuerdo in (select idacuerdo from dt_acuerdo where vigente = 1) and pais = 'AR' and producto <> 'LATISSE' and  producto <> '0'"
     elif session['pais'] == 'CO':
-        msql1 = " select sum(total_venta) from dt_liberacion where corte ='Cierre' and idacuerdo in (select idacuerdo from dt_acuerdo where vigente = 1) and pais = 'CO'"
+        msql1 = " select sum(total_venta) from dt_liberacion where corte <> 'Cierre' and idacuerdo in (select idacuerdo from dt_acuerdo where vigente = 1) and pais = 'CO'"
         msql2 = "select SUM(cantidad) from dt_ventas where idacuerdo in (select idacuerdo from dt_acuerdo where vigente = 1) and pais = 'CO' and producto <> 'LATISSE' and  producto <> 'BOTOX 50U' and  producto <> '0'"
     cur.execute(msql1)
+    print(msql1)
     cont1 = cur.fetchone()[0]
     cur.execute(msql2)
     cont2 = cur.fetchone()[0]
@@ -105,6 +106,7 @@ def verificaciones():
     lb_vgt = cst_liberaciones_vigentes()
     vrf_am = vrf_acuerdos_multiples()
     vrf_vl = vrf_ventas_liberaciones()
+    print(vrf_am)
     return render_template('parametros/verificaciones.html', vrf_am=vrf_am, vrf_vl=vrf_vl, cst_a=cst_a, cst_av=cst_av, lb=lb, lb_vgt=lb_vgt)
 
 @app.route('/checkventas', methods=['GET','POST'])
