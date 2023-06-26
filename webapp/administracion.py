@@ -220,6 +220,8 @@ def importar_ventas():
     if uploaded_file.filename != '':
         archivo = uploaded_file.save(archivo)
         df = pd.read_excel(os.path.join(app.root_path, 'static/uploads/' , uploaded_file.filename), sheet_name= 0 , engine='openpyxl')
+        df = df.dropna(how='all')
+        print(df)
         #Numero de clientes de ventas, para el reporte
         nc = str(df["sap_id"].nunique())
         df = df.fillna(0)
@@ -235,20 +237,20 @@ def importar_ventas():
         cur.execute(msql)
         ventasactuales = cur.fetchone()[0]
         session["ventasIniciales"] = ventasactuales
-        print(ventasactuales)
+        print(df)
 
         i = 1
         for row in dt:
-
+            print(row)
             invoice_date = '1'
             idcliente = str(row[1])
-            venta_mes = str(row[6])
-            venta_ano = str(row[7])
+            venta_mes = str(int(row[6]))
+            venta_ano = str(int(row[7]))
             sap_id = str(row[0])
             pais = str(row[1])
             producto = str(row[2])
             idproducto = str(row[3])
-            cantidad = str(row[4])
+            cantidad = str(int(row[4]))
             idveeva = str(row[5])
             idacuerdo = ''
             if row[6] < 10:
@@ -275,14 +277,10 @@ def importar_ventas():
             log.write(df2)
             log.write("\n")
     mensaje = 'Ok, importado'
-    if ventasactuales2 - ventasactuales == df.shape[0]:
-        print(mensaje)
-        return mensaje
 
-    else:
-        print("e")
-        return "Hubo un problema con la carga"
-        
+    return mensaje
+
+
 def ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion):
     msql = "INSERT INTO dt_ventas "
     msql = msql + "(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion)"
@@ -292,10 +290,12 @@ def ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, 
     cur = conn.cursor()
     try:    
         cur.execute(msql)
+        print(msql)
         conn.commit()
         mensaje = 'Factura Guardada'
     except Exception as e:
         mensaje = 'Error al guardar ' + str(e)
+        print(mensaje)
     cur.close()
     conn.close()  
 

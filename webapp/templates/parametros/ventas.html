@@ -94,7 +94,7 @@
     });
 
     async function btn_importar(){
-        setInterval(()=> {poll()},25000)
+        setInterval(()=> {poll()},500000)
 
       const { value: file } = await Swal.fire({
       title: 'Seleccione el archivo a imporar',
@@ -183,7 +183,7 @@
 
      const poll = async() => {
         await fetch('/checkventas').then(response => response.text()).then((data) => {
-            let text = 'Espere a que termine de importar. No cierre la ventana. Tomara unos minutos!!! \n Progreso:' + data
+            let text = 'Espere a que termine de importar. No cierre la ventana. Tomara unos minutos!!! \n Progreso: subiendo'
             Swal.fire({
                   icon: 'warning',
         title: text,

@@ -116,5 +116,9 @@ def checkventas():
     msql = "select count(idventas) from dt_ventas where pais ='AR'"
     cur.execute(msql)
     ventasactuales = cur.fetchone()[0]
-    dif = ventasactuales - session["ventasIniciales"]
-    return str(dif)+"/"+str(session["currentUpload"])
+    try:
+        dif = ventasactuales - session["ventasIniciales"]
+        return str(dif) + "/" + str(session["currentUpload"])
+    except:
+        dif = 0
+        return str('subiendo')
