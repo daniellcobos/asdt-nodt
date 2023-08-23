@@ -15,7 +15,7 @@
 <hr>
 
 <div class="container">
-  <div class="col-sm-4">{{ registro[1] }}</div>
+
   <!-- Control the column width, and how they should appear on different devices -->
   <div class="row">
     <div class="col-sm-2">ID Consultor</div>
@@ -283,23 +283,7 @@
     var sel = document.getElementById("maño_inicio");
     var año= sel.options[sel.selectedIndex].text;
 
-    for (i = 0; i < idmax.length; i++) {
 
-      if (año == idmax[i].Periodo)
-      {
-        mkey = idmax[i].Id + 1;
-        mkey = '{{ pais }}' + "-"  + mkey ;
-        
-      }
-
-    }
-    if (mkey == '')
-    {
-      mkey = año  + '0001' ;
-      mkey = '{{ pais }}' + "-"  + mkey ; 
-    }
-
-    document.getElementById("idacuerdo").value = mkey ;
     consulta_intervalo();
 
   }
@@ -452,7 +436,7 @@
 
     $('#mmes_fin').selectpicker('val', [ mesfin]);
     $('#mmes').selectpicker('refresh');
-
+    console.log("cambiado")
   }
 
   function addDays(date, days) {

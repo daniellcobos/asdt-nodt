@@ -742,11 +742,32 @@ def crear_liberacion(idacuerdo, idconsultor, consultor, idcliente, cliente, mes_
         insertar_liberacion(periodo, pais, idacuerdo, consultor, idcliente, cliente, duracion,  "1", t[0], t[1], t[2], meta , fgs_sobre_cien, teorico, cumplimiento,  t[3], t[4], t[5], t[6], t[7], t[8], t[9], t[10], t[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
         insertar_liberacion(periodo, pais, idacuerdo, consultor, idcliente, cliente, duracion,  "Cierre", t[0], t[1], t[2], meta , fgs_sobre_cien, teorico, cumplimiento,  t[3], t[4], t[5], t[6], t[7], t[8], t[9], t[10], t[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
 
+    if duracion == 4:
+        f1 = date(ano_ini, mes_ini, 1)
+        f2 = date(ano_fin, mes_fin, 1)
+        f3 = f1 + relativedelta(months=1)
+        f4 = f2 - relativedelta(months=1)
+        f5 = f2 + relativedelta(months=1)
+        v = [0,0,0,0,0,0,0,0,0]
+        periodo = f1.strftime("%Y") + f1.strftime("%m") + f3.strftime("%Y") + f3.strftime("%m")
+        periodo2 =  f4.strftime("%Y") + f4.strftime("%m") + f2.strftime("%Y") + f2.strftime("%m")
+        periodo3 =  f1.strftime("%Y") + f1.strftime("%m") + f2.strftime("%Y") + f2.strftime("%m")
+        ano_entrega = f5.year
+        t = [f1.strftime("%B") + "-" + f3.strftime("%B"), f4.strftime("%B"), ano_entrega, v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8]]
+        t2 = [f4.strftime("%B") + "-" + f2.strftime("%B"), f5.strftime("%B"), ano_entrega, v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8]]
+        t3 = [f1.strftime("%B") + "-" + f2.strftime("%B"), f5.strftime("%B"), ano_entrega, v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8]]
+        meta = cantidad_periodo * duracion
+        teorico = (meta) * (fgs_sobre_cien / 100)
+        cumplimiento = 0
+        insertar_liberacion(periodo, pais, idacuerdo, consultor, idcliente, cliente, duracion,  "1", t[0], t[1], t[2], meta , fgs_sobre_cien, teorico, cumplimiento,  t[3], t[4], t[5], t[6], t[7], t[8], t[9], t[10], t[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
+        insertar_liberacion(periodo2, pais, idacuerdo, consultor, idcliente, cliente, duracion, "2", t2[0], t2[1], t2[2],meta, fgs_sobre_cien, teorico, cumplimiento, t2[3], t2[4], t2[5], t2[6], t2[7], t2[8], t2[9],t2[10], t2[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
+        insertar_liberacion(periodo3, pais, idacuerdo, consultor, idcliente, cliente, duracion,  "Cierre", t3[0], t3[1], t3[2], meta , fgs_sobre_cien, teorico, cumplimiento,  t3[3], t3[4], t3[5], t3[6], t3[7], t3[8], t3[9], t3[10], t3[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
+
         
 
 
     # Calcula los cortes si duracion > 2
-    if duracion > 2:
+    elif duracion > 2:
         # Calcula los cortes
         filas = round(duracion / 3) 
         # Calcula los meses de los cortes

@@ -1,0 +1,31 @@
+server {
+    server_name allergan.easynet.me www.allergan.easynet.me 134.209.77.22;
+
+    location / {
+        uwsgi_ignore_client_abort on; 
+        uwsgi_read_timeout 3600s;
+        uwsgi_send_timeout 3600s;   
+        include uwsgi_params;
+        uwsgi_pass unix:/home/administrador/litio/litio.sock;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/allergan.easynet.me/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/allergan.easynet.me/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = allergan.easynet.me) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name allergan.easynet.me www.allergan.easynet.me 134.209.77.22;
+    return 404; # managed by Certbot
+
+
+}

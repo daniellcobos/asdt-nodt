@@ -15018,3 +15018,26 @@ Revisar CO-20220114 corte: 1
 Revisar CO-20220114 corte: 2
 Revisar CO-20220114 corte: 3
 Revisar CO-20220014 corte: 3
+Cantidad de Clientes: 10 Ventas: 17 Pais: ARFecha: 08/23/2023, 10:06:39
+Ventas por SAP
+sap_id
+SAR1607    1
+SAR1608    2
+SAR1609    2
+SAR1610    1
+SAR1611    2
+SAR1612    2
+SAR1613    1
+SAR1614    2
+SAR1615    1
+SAR1616    3
+Vinculacion ejecutada en: 08/23/2023, 10:14:21
+Acuerdos Vinculados: 3025 acuerdo :AR-20210173
+Tiempo: 440.009658575058
+Cantidad de Clientes: 1 Ventas: 17 Pais: ARFecha: 08/23/2023, 10:17:54
+Ventas por SAP
+sap_id
+SAR1607    17
+Vinculacion ejecutada en: 08/23/2023, 10:25:36
+Acuerdos Vinculados: 3025 acuerdo :AR-20210173
+Tiempo: 430.6032245159149
