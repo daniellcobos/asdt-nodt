@@ -231,7 +231,8 @@ def freegoods_exportar():
     print(sql_data)
     for col_num, value in enumerate(sql_data.columns.values):
         worksheet.write(0, col_num, value, fmt)
-    writer.save()
+
+    writer.close()
     cur.close()
     conn.close()
 
