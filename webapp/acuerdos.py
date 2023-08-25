@@ -210,7 +210,7 @@ def acuerdos_add(idconsultor, usuario, pais):
     freegoods = cur.fetchall() 
     print(freegoods)
     # Envia la tabla maestra de acuerdos
-    msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "' order by idplazo"
+    msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and usar = 1 order by idplazo"
     cur.execute(msql)
     plazos = cur.fetchall()     
     cur.close()
@@ -316,9 +316,10 @@ def acuerdos_editar(idacuerdo):
     cur.execute(msql)
     freegoods = cur.fetchall() 
     # Envia la tabla maestra de acuerdos
-    msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + session['pais'] + "' order by idplazo"
+    msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + session['pais'] + "' and usar = 1 order by idplazo"
     cur.execute(msql)
-    plazos = cur.fetchall()     
+    plazos = cur.fetchall()
+
     cur.close()
     conn.close()
     return render_template('acuerdos/acuerdos_edit.html',  consultores = consultores, clientes = clientes, registro = registro, freegoods = freegoods, plazos = plazos)
