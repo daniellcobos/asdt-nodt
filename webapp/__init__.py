@@ -48,7 +48,7 @@ def load_user(user_id):
     #return User.objects(id=user_id).first()
 
 salt = app.config["APP_SECRET_KEY"]
-logging.basicConfig(filename='mainlog.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='mainlog.log', level=logging.DEBUG)
 
 # Ingreso al sistema con validacion de usuario funcion login
 @app.route('/', methods=['GET', 'POST'])
