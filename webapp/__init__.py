@@ -48,12 +48,14 @@ def load_user(user_id):
     #return User.objects(id=user_id).first()
 
 salt = app.config["APP_SECRET_KEY"]
+logging.basicConfig(filename='mainlog.log', encoding='utf-8', level=logging.DEBUG)
 
 # Ingreso al sistema con validacion de usuario funcion login
 @app.route('/', methods=['GET', 'POST'])
 def login():
     # Output message if something goes wrong...
     msg = ''
+    logger = setup_logger('auth', 'auth.log')
     # Check if "username" and "password" POST requests exist (user submitted form)
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         conn = psycopg2.connect(db_connection_string)
@@ -84,10 +86,14 @@ def login():
             # Redirect to home page
             cur.close()
             conn.close()
+
+            current = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+            logger.info(username + ' has logged in on '+current)
             return redirect(url_for('misacuerdos'))
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Usuario/Clave Incorrecto!'
+
     # Show the login form with message (if any)
     return render_template('autenticacion/login.html', msg=msg)
 
@@ -104,12 +110,17 @@ def before_request():
 # Cierra la sesion actual
 @app.route('/logout')
 def logout():
+    logger = setup_logger('auth', 'auth.log')
     # Remove session data, this will log the user out
-   session.pop('loggedin', None)
-   session.pop('id', None)
-   session.pop('username', None)
-   # Redirect to login page
-   return redirect(url_for('login'))        
+    current = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+    logger.info(session['username'] + ' has logged out on ' + current)
+    session.pop('loggedin', None)
+    session.pop('id', None)
+    session.pop('username', None)
+    # Redirect to login page
+
+
+    return redirect(url_for('login'))
 
 
 # Rutas para los usuarios
@@ -383,4 +394,15 @@ def formatovigente(value):
     if value == 3:
         vigente = "Cancelado"
         
-    return vigente    
+    return vigente
+
+def setup_logger(name, log_file, level=logging.INFO):
+
+
+    handler = logging.FileHandler(log_file)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger

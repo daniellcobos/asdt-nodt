@@ -3,3 +3,6 @@ configuraciones.py
 *.xls
 log.txt
 /webapp/upload/
+auth.log
+enter.log
+mainlog.log

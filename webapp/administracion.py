@@ -13,12 +13,15 @@ from xlsxwriter import Workbook
 import smtplib, ssl
 from email.mime.text import MIMEText
 import psycopg2.extras
+import logging
 
 from webapp import app
 import hashlib
 app.config.from_object('configuraciones.local')
 db_connection_string = app.config["POSTGRESQL_CONNECTION"]
 salt = app.config["APP_SECRET_KEY"]
+
+
 @app.route('/freegoods', methods=['GET'])
 def freegoods():
     conn = psycopg2.connect(db_connection_string)
