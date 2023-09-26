@@ -51,7 +51,10 @@
   <div class="row">
     <div class="col-sm-2">Password</div>
     <div class="col-sm-6"><input type="text" class="form-control hidetext" id="password" name="password"></div>
-  </div>   
+  </div>
+    <div class="row mt-1 alert alert-danger" role="alert" style="display: none" id="alert">
+  La contrasena requiere 8 caracteres, una minuscula, una mayuscula y un numero
+</div>
   <hr>
   <td><button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Agregar Cliente" onclick="btn_guardar()">Guardar</button></td>
   <td><a class="btn btn-primary" href="/usuarios_grilla" role="button"  data-toggle="tooltip" data-placement="top">Volver</a></td>
@@ -95,7 +98,25 @@ $.ajax({
 
 }
 
+  const passwordinput = document.getElementById("password")
+  function validatePassword(pw) {
 
+    return /[A-Z]/       .test(pw) &&
+           /[a-z]/       .test(pw) &&
+           /[0-9]/       .test(pw) &&
+           pw.length > 8;
+
+}
+
+   passwordinput.addEventListener("input", (event) => {
+   if (validatePassword(passwordinput.value)){
+        document.getElementById("alert").style.display = "none"
+   }
+   else{
+       document.getElementById("alert").style.display = "block"
+   }
+  // do something
+});
  
   </script>  
 

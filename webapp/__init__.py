@@ -47,6 +47,7 @@ def load_user(user_id):
     return 'ok'
     #return User.objects(id=user_id).first()
 
+salt = app.config["APP_SECRET_KEY"]
 
 # Ingreso al sistema con validacion de usuario funcion login
 @app.route('/', methods=['GET', 'POST'])
@@ -60,9 +61,10 @@ def login():
         # Create variables for easy access
         username = request.form['username']
         password = request.form['password']
-        #m = hashlib.md5()
-        #m.update(password.encode('utf-8'))
-        #password = m.hexdigest()        
+        saltpass = salt+password
+        m = hashlib.sha3_256()
+        m.update(saltpass.encode('utf-8'))
+        password = m.hexdigest()
         # Check if account exists using postgress
         msql =  "SELECT * FROM dt_usuarios WHERE email = '" + username + "' AND contrasena = '" + password + "'"
         cur.execute(msql)
@@ -231,8 +233,7 @@ def freegoods_exportar():
     print(sql_data)
     for col_num, value in enumerate(sql_data.columns.values):
         worksheet.write(0, col_num, value, fmt)
-
-    writer.close()
+    writer.save()
     cur.close()
     conn.close()
 

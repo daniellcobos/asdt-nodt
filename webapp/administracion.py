@@ -1,5 +1,5 @@
 # Programa de Administracion
-from flask import Flask, flash, jsonify, redirect, url_for, session, send_file, g, send_from_directory
+from flask import Flask,  flash, jsonify, redirect, url_for, session, send_file, g
 import psycopg2
 from flask import render_template
 from flask import request
@@ -13,13 +13,12 @@ from xlsxwriter import Workbook
 import smtplib, ssl
 from email.mime.text import MIMEText
 import psycopg2.extras
-import time
-from webapp import app
-from .informes import *
 
+from webapp import app
+import hashlib
 app.config.from_object('configuraciones.local')
 db_connection_string = app.config["POSTGRESQL_CONNECTION"]
-
+salt = app.config["APP_SECRET_KEY"]
 @app.route('/freegoods', methods=['GET'])
 def freegoods():
     conn = psycopg2.connect(db_connection_string)
@@ -72,14 +71,20 @@ def usuarios_guardar():
     idusuario = request.form.getlist('idusuario')
     usuario = request.form.getlist('usuario')
     email = request.form.getlist('email')
-    password = request.form.getlist('password')
+    password = request.form.getlist('password')[0]
+    saltpass = salt+password
+    print(saltpass)
+    m = hashlib.sha3_256()
+    m.update(saltpass.encode('utf-8'))
+    password = m.hexdigest()
+    print(password)
     perfil = request.form.getlist('perfil')
     pais = request.form.getlist('pais')
     
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
     msql = "INSERT INTO dt_usuarios(idusuario, usuario, email, contrasena, nivel, pais, region) "
-    msql = msql + "	VALUES ('" + idusuario[0] + "','" + usuario[0] + "','" + email[0] + "','" + password[0] + "','" + perfil[0] + "', '" + pais[0] + "', 0);"
+    msql = msql + "	VALUES ('" + idusuario[0] + "','" + usuario[0] + "','" + email[0] + "','" + password + "','" + perfil[0] + "', '" + pais[0] + "', 0);"
     try:    
         cur.execute(msql)  
         mensaje = 'Ok. Registro agregado'          
@@ -121,14 +126,18 @@ def usuarios_actualizar():
     idusuario = request.form.getlist('idusuario')
     usuario = request.form.getlist('usuario')
     email = request.form.getlist('email')
-    password = request.form.getlist('password')
+    password = request.form.getlist('password')[0]
     perfil = request.form.getlist('perfil')
+    saltpass = salt + password
+    print(saltpass)
     pais = request.form.getlist('pais')
-    
+    m = hashlib.sha3_256()
+    m.update(saltpass.encode('utf-8'))
+    password = m.hexdigest()
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
     msql = "UPDATE dt_usuarios "
-    msql = msql +  "SET usuario='" + usuario[0] + "', email= '" + email[0] + "', contrasena='"+ password[0] + "', nivel= '" + perfil[0] + "'"
+    msql = msql +  "SET usuario='" + usuario[0] + "', email= '" + email[0] + "', contrasena='"+ password+ "', nivel= '" + perfil[0] + "'"
     msql = msql + " WHERE idusuario = '" + idusuario[0] + "';"
     print(msql)
     try:    
@@ -216,41 +225,24 @@ def importar_ventas():
     mensaje = "Sin procesar"        
     uploaded_file = request.files['file']
     archivo = os.path.join(app.root_path, 'static/uploads/' , uploaded_file.filename)
-    archivolog = os.path.join(app.root_path, 'static/', "uploadlog.txt")
     if uploaded_file.filename != '':
         archivo = uploaded_file.save(archivo)
         df = pd.read_excel(os.path.join(app.root_path, 'static/uploads/' , uploaded_file.filename), sheet_name= 0 , engine='openpyxl')
-        df = df.dropna(how='all')
-        print(df)
-        #Numero de clientes de ventas, para el reporte
-        nc = str(df["sap_id"].nunique())
         df = df.fillna(0)
-        #numero de ventas por cliente para el reporte
-        df2 = df.groupby(['sap_id'])['cantidad'].sum().to_string()
-        cansum = df['cantidad'].sum()
-        session["currentUpload"] = df.shape[0]
-
         dt = df.to_numpy()
         conn = psycopg2.connect(db_connection_string)
         cur = conn.cursor()
-        msql = "select count(idventas) from dt_ventas where pais ='AR'"
-        cur.execute(msql)
-        ventasactuales = cur.fetchone()[0]
-        session["ventasIniciales"] = ventasactuales
-        print(df)
-
         i = 1
-        for row in dt:
-            print(row)
+        for row in dt:  
             invoice_date = '1'
             idcliente = str(row[1])
-            venta_mes = str(int(row[6]))
-            venta_ano = str(int(row[7]))
+            venta_mes = str(row[6])
+            venta_ano = str(row[7])
             sap_id = str(row[0])
             pais = str(row[1])
             producto = str(row[2])
             idproducto = str(row[3])
-            cantidad = str(int(row[4]))
+            cantidad = str(row[4])
             idveeva = str(row[5])
             idacuerdo = ''
             if row[6] < 10:
@@ -263,24 +255,13 @@ def importar_ventas():
             mensaje = ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion)
             i = i + 1
         
-        # Determina a que acuerdo esta una venta
-        #ventasxacuerdos1(session['pais'])
-        #calcular total ventas de nuevo
-        msql = "select count(idventas) from dt_ventas where pais ='AR'"
-        cur.execute(msql)
-        ventasactuales2 = cur.fetchone()[0]
-        print(ventasactuales2)
-        conn.close()
-        with open(archivolog, "a+") as log:
-            log.write("Cantidad de Clientes: " + nc + " Ventas: "+ str(cansum) + " Pais: "+ session['pais']  + "Fecha: "+ datetime.now().strftime("%m/%d/%Y, %H:%M:%S") +"\n" )
-            log.write("Ventas por SAP" +"\n"  )
-            log.write(df2)
-            log.write("\n")
+        # Determina a aque acuerdo esta una venta
+        ventasxacuerdos1(session['pais'])
+
     mensaje = 'Ok, importado'
 
     return mensaje
-
-
+        
 def ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion):
     msql = "INSERT INTO dt_ventas "
     msql = msql + "(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion)"
@@ -290,12 +271,10 @@ def ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, 
     cur = conn.cursor()
     try:    
         cur.execute(msql)
-        print(msql)
         conn.commit()
         mensaje = 'Factura Guardada'
     except Exception as e:
         mensaje = 'Error al guardar ' + str(e)
-        print(mensaje)
     cur.close()
     conn.close()  
 
@@ -317,7 +296,7 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
   colnames = [desc[0] for desc in cur.description]
 
   df1 = pd.DataFrame(row, columns=colnames)
-
+  df1
 
   cliente = df1.idcliente
   clientes.append(cliente.iloc[0])
@@ -355,14 +334,10 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
         periodos.append(q)
 
 
-
   # Para cada cliente de un acuerdo busca si hay ventas y le pone el id del acuerdo
-  for cliente in clientes:
-    #Convierte el id del cliente a mayuscula
-    clientequery = cliente.upper()
-    print(clientequery)
+  for cliente in clientes:  
     for periodo in periodos:    
-      msql = "update dt_ventas set idacuerdo = '"+ idacuerdo + "' where sap_id = '" + clientequery + "' and idperiodo = '" + periodo.strftime("%Y%m") + "'"
+      msql = "update dt_ventas set idacuerdo = '"+ idacuerdo + "' where sap_id = '" + cliente + "' and idperiodo = '" + periodo.strftime("%Y%m") + "'"
       cur.execute(msql)
       conn.commit()
 
@@ -370,16 +345,13 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
   conn.close() 
 
 
-
 @app.route('/ventasxacuerdos1/<string:pais>', methods=['GET',"POST"])
 @app.route('/ventasxacuerdos1/<string:pais>', methods=['GET',"POST"])
 def ventasxacuerdos1(pais):
-    start = time.time()
-    archivolog = os.path.join(app.root_path, 'static/', "uploadlog.txt")
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
 
-    msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' and aprobado <> '3'"
+    msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' "
     cur.execute(msql)
 
     row = cur.fetchall()
@@ -390,16 +362,10 @@ def ventasxacuerdos1(pais):
     for index, row in df2.iterrows():
         idacuerdo = row.iloc[0]
         pcd_identificar_ventaxacuerdo(idacuerdo)
-        message = str(index) + " acuerdo :" + str(idacuerdo)
-        print(message)
+        print(str(index) + " acuerdo :" + str(idacuerdo))
 
     cur.close()
-    conn.close()
-    end = time.time()
-    with open(archivolog, "a+") as log:
-        log.write("Vinculacion ejecutada en: "+ datetime.now().strftime("%m/%d/%Y, %H:%M:%S") +"\n")
-        log.write("Acuerdos Vinculados: " + message +"\n")
-        log.write("Tiempo: " + str(end - start) +"\n")
+    conn.close() 
 
     return "Termino"
 
@@ -531,7 +497,7 @@ def importar_precios():
     return 'Ok, importado'
 
 def precios_insertar(producto, idproducto, periodo, precio_lista, precio, pais):
-    msql = "INSERT INTO dt_precios"
+    msql = "INSERT INTO dt_precios "
     msql = msql + "(producto,idproducto,periodo,precio_lista,precio,pais)"
     msql = msql + " VALUES ('" +  producto + "','"  + idproducto + "','" + periodo + "','"  + precio_lista + "','"  + precio + "','"  + pais + "')"
     mensaje = ""
@@ -712,50 +678,3 @@ def sistema():
         return render_template('parametros/sistema.html')
     else:
          return redirect('/misacuerdos')
-
-@app.route('/metricas')
-def metricas():
-    archivolog = os.path.join(app.root_path, 'static/', "informelog.txt")
-    conn = psycopg2.connect(db_connection_string)
-    cur = conn.cursor()
-    msql = "select venta_ano,venta_mes,sum(cantidad) from dt_ventas where pais = %s group by venta_mes,venta_ano order by venta_ano, venta_mes;"
-    cur.execute(msql, (session['pais'],))
-    df = pd.DataFrame(cur.fetchall(), columns=["Año","Mes","Cantidad"])
-    msql = "select venta_ano,venta_mes,sum(cantidad) from dt_ventas where pais = %s and idacuerdo <> '' group by venta_mes,venta_ano order by venta_ano, venta_mes;"
-    cur.execute(msql, (session['pais'],))
-    df2 = pd.DataFrame(cur.fetchall(), columns=["Año","Mes","Cantidad"])
-    msql = "select ano_ini,mes_ini,count(idacuerdo) from dt_acuerdo where vigente = 1 and pais=%s group by mes_ini,ano_ini order by ano_ini, mes_ini;"
-    cur.execute(msql, (session['pais'],))
-    df3 = pd.DataFrame(cur.fetchall(), columns=["Año","Mes","Cantidad"])
-    msql = "select ano_ini,mes_ini,count(idacuerdo) from dt_acuerdo where vigente = 1 and pais=%s and idacuerdo in (select dt_ventas.idacuerdo from dt_ventas) group by mes_ini,ano_ini order by ano_ini, mes_ini;"
-    cur.execute(msql, (session['pais'],))
-    df4 = pd.DataFrame(cur.fetchall(), columns=["Año","Mes","Cantidad"])
-    msql = "select count(*) from dt_liberacion where pais = %s;"
-    cur.execute(msql, (session['pais'],))
-    n1 = cur.fetchone()
-    msql = "select count(*) from dt_liberacion where pais = %s and idacuerdo in (select dt_acuerdo.idacuerdo  from dt_acuerdo where vigente = 1);"
-    cur.execute(msql, (session['pais'],))
-    n2 = cur.fetchone()
-    df.to_excel("v1.xlsx")
-    df2.to_excel("v2.xlsx")
-    df3.to_excel("v3.xlsx")
-    df4.to_excel("v4.xlsx")
-    with open(archivolog, "w+") as log:
-            log.write("Cantidad de ventas por mes: \n" )
-            log.write(df.to_string() + "\n")
-            log.write("Cantidad de ventas por mes vinculadas a un acuerdo:" +"\n"  )
-            log.write(df2.to_string() + "\n")
-            log.write("Cantidad de acuerdos activos por mes:" +"\n")
-            log.write(df3.to_string() + "\n")
-            log.write("Cantidad de acuerdos activos por mes vinculados a una venta:" + "\n")
-            log.write(df4.to_string() + "\n")
-            log.write("Liberaciones totales: " + str(n1[0])+ "\n")
-            log.write("Liberaciones totales activas: " + str(n2[0]) + "\n")
-            log.write("\n")
-    folder = os.path.join(app.root_path, "static")
-    print(vrf_acuerdos_multiples())
-    print(vrf_ventas_liberaciones())
-    try:
-        return send_from_directory(path=archivolog, directory=folder, filename="informelog.txt")
-    except:
-        return redirect('/misacuerdos')

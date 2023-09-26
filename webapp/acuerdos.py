@@ -1115,7 +1115,8 @@ def totalizar_ventas(idacuerdo):
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()    
     # Trae los datos de liberacion
-    msql = "SELECT * from dt_liberacion where idacuerdo = '" + idacuerdo + "'" 
+    msql = "SELECT * from dt_liberacion where idacuerdo = '" + idacuerdo + "' order by corte "
+    print(msql)
     cur.execute(msql)
     cortes = cur.fetchall()
     # Ultimo corte
@@ -1185,13 +1186,14 @@ def totalizar_ventas(idacuerdo):
                     q9 = round(p[1])
             
             mventa = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9))
-            print(q1 , q2 , q3 , q4 , q5 , q6 , q7 , q8,q9)
-            print(mventa,checkeo)
+            #print("cierre q",q1 , q2 , q3 , q4 , q5 , q6 , q7 , q8,q9)
+            #print(mventa,checkeo)
             if mventa != checkeo:
                 with open(archivolog, "a+") as log:
                     log.write("Revisar "+ idacuerdo+" corte: "+corte+"\n")
             mtotal = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9)*porcentaje)
-            #print(mtotal)
+
+
             mtotalac = mtotalac + ((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9) * porcentaje)
             if mventa > 0:
                 p1 = round(((q1/mventa)* mtotal) + 0.01)
@@ -1210,15 +1212,16 @@ def totalizar_ventas(idacuerdo):
                            "harmonyca":(q9/mventa) * mtotal
                            }
                 pventas = sorted(pventas.items(), key=lambda item: item[1])
-                #print(pventas)
+                print("ventas",pventas)
                 for venta in pventas:
                     if venta[1] < 0.5:
                         pass
                     else:
                         lower = venta[0]
                         break
-                mtotal2 = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8
-
+                mtotal2 = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9
+                print("freep",p1, p2, p3, p4, p5, p6, p7, p8, p9)
+                print("mtotal",mtotal,"mtotal2",mtotal2)
                 if (mtotal < mtotal2):
                     if lower == "botox":
                         p1 = p1 - 1
@@ -1238,6 +1241,9 @@ def totalizar_ventas(idacuerdo):
                         p8 = p8 - 1
                     if lower == "harmonyca":
                         p9 = p9 - 1
+                    mtotal = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9
+                else:
+                    mtotal = mtotal2
                     #print(p1, p2, p3, p4, p5, p6, p7, p8)
             else:
                 p1 = 0
@@ -1274,7 +1280,7 @@ def totalizar_ventas(idacuerdo):
                 p8 = 0
             if p9 <0:
                 p9 = 0
-            print(p1, p2, p3, p4, p5, p6, p7, p8, p9)
+            print("free",p1, p2, p3, p4, p5, p6, p7, p8, p9)
 
 
             msql = "UPDATE dt_liberacion SET total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ",harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and periodo = " + str(periodo)
@@ -1284,8 +1290,10 @@ def totalizar_ventas(idacuerdo):
         else:
             # Aqui se hace el cierre como la suma de todo el acuerdo
             msql = "select sum(fgs_teoricos),sum(total_venta),sum(botox),sum(ultra),sum(ultra_plus),sum(volbella),sum(volift),sum(volite),sum(voluma),sum(volux),sum(harmonyca),sum(total_fgs) from dt_liberacion where idacuerdo = '" + idacuerdo + "' and corte <> 'Cierre'"
+            print(msql)
             cur.execute(msql)
             cierre = cur.fetchone()
+
             mteoricos = cierre[0]
             mventa = cierre[1]
             p1 = cierre[2]
@@ -1301,28 +1309,36 @@ def totalizar_ventas(idacuerdo):
                 p9 = 0
 
             mtotal = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9
+            #print("totalc",p1,p2,p3,p4,p5,p6,p7,p8,p9)
+            #print("mtotal",mtotal)
             #Obtiene el producto mas vendido
             bigger = {"botox": p1, "ultra": p2 ,"ultra_plus": p3, "volbella": p4, "volift": p5, "volite": p6, "voluma": p7, "volux": p8, "harmonyca": p9}
             print(bigger)
             biggerone = max(bigger, key=bigger.get)
             msql = "UPDATE dt_liberacion SET fgs_teoricos = " + str(mteoricos) +  ", total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ", harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and corte = 'Cierre' "
-            print(msql)
+
+            #print(msql)
             #log temporal
 
             cur.execute(msql)
             conn.commit()
         
     mtotalac = round(mtotalac)
+    print("mtotalac",mtotalac)
     #Redondeo vs Suma en cierre
     if mtotalac > mtotal:
         msql = "UPDATE dt_liberacion set total_fgs= total_fgs+1 WHERE idacuerdo = %s and corte = %s"
         cur.execute(msql, ( idacuerdo, str(lastcorte)))
         msql = "UPDATE dt_liberacion set {field}= {field}+1 WHERE idacuerdo = %s and corte = %s".format(field=biggerone)
+        #print(msql,idacuerdo,lastcorte)
         cur.execute(msql, (idacuerdo, str(lastcorte)))
+        conn.commit()
         # El Cierre tambien quedaba incompleto
         msql = "UPDATE dt_liberacion set total_fgs= total_fgs+1 WHERE idacuerdo = %s and corte = %s"
+        #print(msql,idacuerdo,cierre)
         cur.execute(msql, (idacuerdo, 'Cierre'))
         msql = "UPDATE dt_liberacion set {field}= {field}+1 WHERE idacuerdo = %s and corte = %s".format(field=biggerone)
+        #print(msql, idacuerdo, lastcorte)
         cur.execute(msql, (idacuerdo, 'Cierre'))
         conn.commit()
 
