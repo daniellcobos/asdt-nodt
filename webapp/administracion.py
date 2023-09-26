@@ -80,7 +80,6 @@ def usuarios_guardar():
     m = hashlib.sha3_256()
     m.update(saltpass.encode('utf-8'))
     password = m.hexdigest()
-    print(password)
     perfil = request.form.getlist('perfil')
     pais = request.form.getlist('pais')
     
