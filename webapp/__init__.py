@@ -11,7 +11,8 @@ import sys
 from flask_login import LoginManager,login_user,logout_user,login_required,current_user
 import smtplib, ssl
 from email.mime.text import MIMEText
-
+import random
+import string
 #from apscheduler.schedulers.background import BackgroundScheduler
 #from apscheduler.triggers.interval import IntervalTrigger
 #import atexit
@@ -68,8 +69,8 @@ def login():
         m.update(saltpass.encode('utf-8'))
         password = m.hexdigest()
         # Check if account exists using postgress
-        msql =  "SELECT * FROM dt_usuarios WHERE email = '" + username + "' AND contrasena = '" + password + "'"
-        cur.execute(msql)
+        msql =  "SELECT * FROM dt_usuarios WHERE email = %s AND contrasena = %s "
+        cur.execute(msql, (username, password))
         # Fetch one record and return result
         row = cur.fetchone()
         # If account exists in accounts table in out database
@@ -256,34 +257,46 @@ def recuperar_acceso(email):
     username = email
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
-    msql = "SELECT * FROM dt_usuarios WHERE email = '" + username + "'"
-    cur.execute(msql)
+    msql = "SELECT * FROM dt_usuarios WHERE email = %s"
+    characters = string.ascii_letters + string.digits
+    passwordplain = ''.join(random.choice(characters) for i in range(9))
+    saltpass = salt + passwordplain
+    m = hashlib.sha3_256()
+    m.update(saltpass.encode('utf-8'))
+    password = m.hexdigest()
+    cur.execute(msql, (username, ))
     row = cur.fetchone()
-    cur.close()
-    conn.close()  
+
 
     if row == None:
+        cur.close()
+        conn.close()
         return "No es un usuario del sistema."  
 
+    else:
+        msql = "UPDATE dt_usuarios  SET contrasena= %s WHERE idusuario = %s ;"
+        cur.execute(msql, (password, row[0]))
+        conn.commit()
+        cur.close()
+        conn.close()
+        # Evniar a:
+        receiver_email = email
+        # creates SMTP session
+        s = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
+        # start TLS for security
+        s.starttls()
+        # Authentication
+        s.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+        # message to be sent
+        message = '<html><body> <b>Su nuvea contraseña de acceso al sistema es: </b> ' + passwordplain + ', recuerde cambiarla al entrar</body></html>'
+        my_email = MIMEText(message, "html")
+        my_email["Subject"] = "Revise este correo para su acceso a Allergan.easynet.me "
+        # sending the mail
+        s.sendmail(app.config['MAIL_USERNAME'], receiver_email, my_email.as_string())
+        # terminating the session
+        s.quit()
 
-    # Evniar a:
-    receiver_email = email
-    # creates SMTP session
-    s = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
-    # start TLS for security
-    s.starttls()
-    # Authentication
-    s.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
-    # message to be sent
-    message = '<html><body> <b>Su contraseña de acceso al sistema es: </b> ' + row[3] + '</body></html>'
-    my_email = MIMEText(message, "html")
-    my_email["Subject"] = "Revise este correo para su acceso a Allergan.easynet.me "
-    # sending the mail
-    s.sendmail(app.config['MAIL_USERNAME'], receiver_email, my_email.as_string())
-    # terminating the session
-    s.quit()
-
-    return "La contraseña fue enviada a su email registrado."   
+        return "La contraseña fue enviada a su email registrado."
  
 
 #Procedimientos de mantenimiento
