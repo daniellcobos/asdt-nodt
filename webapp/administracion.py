@@ -242,6 +242,7 @@ def importar_ventas():
             venta_ano = str(row[7])
             sap_id = str(row[0])
             pais = str(row[1])
+            print(pais,row[1])
             producto = str(row[2])
             idproducto = str(row[3])
             cantidad = str(row[4])
