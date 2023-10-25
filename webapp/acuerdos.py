@@ -130,6 +130,7 @@ def acuerdosdetalle_exportar(idconsultor):
 
     return mnombre
 
+
 @app.route('/acuerdossubdetalle/<string:idacuerdo>', methods=['GET'])
 def acuerdossubdetalle(idacuerdo):
     conn = psycopg2.connect(db_connection_string)

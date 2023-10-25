@@ -6,3 +6,6 @@ log.txt
 auth.log
 enter.log
 mainlog.log
+settings.json
+*.crt
+*.key
