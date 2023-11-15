@@ -155,7 +155,7 @@ def acshandler(auth,req):
     request_id = None
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
-    print(request.form)
+
     if 'AuthNRequestID' in session:
         request_id = session['AuthNRequestID']
 
@@ -166,7 +166,6 @@ def acshandler(auth,req):
         if 'AuthNRequestID' in session:
             del session['AuthNRequestID']
         session['samlUserdata'] = auth.get_attributes()
-        print(auth.get_attributes())
         email = auth.get_attributes()["email_address"][0]
         msql = "SELECT * FROM dt_usuarios WHERE email = %s"
         cur.execute(msql, (email, ))

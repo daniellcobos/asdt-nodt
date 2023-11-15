@@ -1137,8 +1137,8 @@ def totalizar_ventas(idacuerdo):
         corte = row[8]
         if (corte != 'Cierre'):
             # Calcula las ventas del periodo
-            msql = "SELECT producto, sum(cantidad) from dt_ventas WHERE idperiodo BETWEEN " + str(f1) + " AND " + str(f2) + " AND idacuerdo = '" + idacuerdo + "' and PRODUCTO <> 'LATISSE' GROUP BY producto;"
-            print(msql)
+            msql = "SELECT producto, sum(cantidad) from dt_ventas WHERE idperiodo BETWEEN " + str(f1) + " AND " + str(f2) + " AND idacuerdo = '" + idacuerdo + "' and PRODUCTO <> 'LATISSE' and PRODUCTO <> 'LATISSE 3ML' GROUP BY producto;"
+            #print(msql)
             cur.execute(msql)
             productos = cur.fetchall()
             q1 = 0
@@ -1188,15 +1188,32 @@ def totalizar_ventas(idacuerdo):
             
             mventa = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9))
             #print("cierre q",q1 , q2 , q3 , q4 , q5 , q6 , q7 , q8,q9)
-            #print(mventa,checkeo)
+            #
             if mventa != checkeo:
+                print("mventa vs checkeo",mventa, checkeo)
                 with open(archivolog, "a+") as log:
+
                     log.write("Revisar "+ idacuerdo+" corte: "+corte+"\n")
             mtotal = round((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9)*porcentaje)
+            #print("porcentaje",porcentaje,"mventa",mventa,"mtotal",mtotal)
 
 
             mtotalac = mtotalac + ((q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8+q9) * porcentaje)
             if mventa > 0:
+                pventas = {"botox": (q1 / mventa) * mtotal, "ultra": (q2 / mventa) * mtotal,
+                           "ultra_plus": (q3 / mventa) * mtotal, "volbella": (q4 / mventa) * mtotal,
+                           "volift": (q5 / mventa) * mtotal, "volite": (q6 / mventa) * mtotal,
+                           "voluma": (q7 / mventa) * mtotal, "volux": (q8 / mventa) * mtotal,
+                           "harmonyca": (q9 / mventa) * mtotal
+                           }
+
+                pventas = sorted(pventas.items(), key=lambda item: item[1])
+                bigtest = sorted(pventas, key=lambda item: item[1], reverse=True)
+
+
+
+
+
                 p1 = round(((q1/mventa)* mtotal) + 0.01)
                 p2 = round(((q2/mventa)*mtotal) + 0.01)
                 p3 = round(((q3/mventa)*mtotal) + 0.01)
@@ -1206,14 +1223,35 @@ def totalizar_ventas(idacuerdo):
                 p7 = round(((q7/mventa)*mtotal) + 0.01)
                 p8 = round(((q8/mventa)*mtotal) + 0.01)
                 p9 = round(((q9/mventa) * mtotal) + 0.01)
-                pventas = {"botox": (q1 / mventa) * mtotal, "ultra": (q2 / mventa) * mtotal,
-                           "ultra_plus": (q3 / mventa) * mtotal, "volbella": (q4 / mventa) * mtotal,
-                           "volift": (q5 / mventa) * mtotal, "volite": (q6 / mventa) * mtotal,
-                           "voluma": (q7 / mventa) * mtotal, "volux": (q8 / mventa) * mtotal,
-                           "harmonyca":(q9/mventa) * mtotal
-                           }
-                pventas = sorted(pventas.items(), key=lambda item: item[1])
-                print("ventas",pventas)
+
+                #caso especial, 1 freegood pero ningun producto per se tiene mas de una unidad
+                if mtotal == 1:
+                    proporciones = [(i / mventa) * mtotal for i in [q1, q2, q3, q4, q5, q6, q7, q8, q9]]
+                    proporcional = any(i > 0.5 for i in proporciones)
+                    if not proporcional:
+                        product = bigtest[0][0]
+                        if product == "botox":
+                            p1 = 1
+                        if product == "ultra":
+                            p2 = 1
+                        if product == "ultra_plus":
+                            p3 = 1
+                        if product == "volbella":
+                            p4 = 1
+                        if product == "volift":
+                            p5 = 1
+                        if product == "volite":
+                            p6 = 1
+                        if product == "voluma":
+                            p7 = 1
+                        if product == "volux":
+                            p8 = 1
+                        if product == "harmonyca":
+                            p9 = 1
+
+
+                #print("bigtest",bigtest)
+                #print("ventas",pventas)
                 for venta in pventas:
                     if venta[1] < 0.5:
                         pass
@@ -1221,8 +1259,12 @@ def totalizar_ventas(idacuerdo):
                         lower = venta[0]
                         break
                 mtotal2 = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9
-                print("freep",p1, p2, p3, p4, p5, p6, p7, p8, p9)
-                print("mtotal",mtotal,"mtotal2",mtotal2)
+                #print("freep",p1, p2, p3, p4, p5, p6, p7, p8, p9)
+                #print("mtotal",mtotal,"mtotal2",mtotal2)
+
+
+
+
                 if (mtotal < mtotal2):
                     if lower == "botox":
                         p1 = p1 - 1
@@ -1285,13 +1327,13 @@ def totalizar_ventas(idacuerdo):
 
 
             msql = "UPDATE dt_liberacion SET total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ",harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and periodo = " + str(periodo)
-            print(msql)
+            #print(msql)
             cur.execute(msql)
             conn.commit()
         else:
             # Aqui se hace el cierre como la suma de todo el acuerdo
             msql = "select sum(fgs_teoricos),sum(total_venta),sum(botox),sum(ultra),sum(ultra_plus),sum(volbella),sum(volift),sum(volite),sum(voluma),sum(volux),sum(harmonyca),sum(total_fgs) from dt_liberacion where idacuerdo = '" + idacuerdo + "' and corte <> 'Cierre'"
-            print(msql)
+            #print(msql)
             cur.execute(msql)
             cierre = cur.fetchone()
 
@@ -1314,8 +1356,9 @@ def totalizar_ventas(idacuerdo):
             #print("mtotal",mtotal)
             #Obtiene el producto mas vendido
             bigger = {"botox": p1, "ultra": p2 ,"ultra_plus": p3, "volbella": p4, "volift": p5, "volite": p6, "voluma": p7, "volux": p8, "harmonyca": p9}
-            print(bigger)
+            print("BIGGER",bigger)
             biggerone = max(bigger, key=bigger.get)
+            print(biggerone)
             msql = "UPDATE dt_liberacion SET fgs_teoricos = " + str(mteoricos) +  ", total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ", harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and corte = 'Cierre' "
 
             #print(msql)
