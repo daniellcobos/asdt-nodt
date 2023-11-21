@@ -29,7 +29,7 @@
         <th>ID Usuario</th>
         <th>Usuario</th>
         <th>Email</th>
-        <th>Contraseña</th>
+
       </tr>
       </thead>
   </table>
@@ -45,7 +45,8 @@
       var p =  fnt_perfil({{ row[4] }});
       row = [
       "<a class='btn btn-light' href='/usuarios_edit/{{ row[0] }}' role='button'  data-toggle='tooltip' data-placement='top' title='Editar'><i class='fas fa-edit'></i></a><a class='btn btn-light' href='/usuarios_delete/{{ row[0] }}' role='button'  data-toggle='tooltip' data-placement='top' title='Editar'><i class='fas fa-trash'></i></a>",
-      p,'{{ row[5] }}','{{ row[0] }}','{{ row[1] }}','{{ row[2] }}','<p class="hidetext">{{ row[3] }}</p>'];
+      p,'{{ row[5]}}','{{ row[0] }}','{{ row[1] }}','{{ row[2] }}'];
+      console.log(row)
       dt.push(row);
     {% endfor %}
 

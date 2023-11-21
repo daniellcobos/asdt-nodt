@@ -687,7 +687,8 @@ def crear_liberacion(idacuerdo, idconsultor, consultor, idcliente, cliente, mes_
     mes_ini = int(mes_ini)
     ano_fin = int(ano_fin)
     mes_fin = int(mes_fin)  
-    cantidad_periodo = int(cantidad_periodo)  
+    cantidad_periodo = int(cantidad_periodo)
+
 
     # Borra la anterior liberacion si existe para no crear duplicados
     msql =  "DELETE from dt_liberacion where idacuerdo = '" + str(idacuerdo) + "'"
@@ -720,7 +721,7 @@ def crear_liberacion(idacuerdo, idconsultor, consultor, idcliente, cliente, mes_
         f3 = f2  + relativedelta(months=1)
         v = [0,0,0,0,0,0,0,0,0]
         periodo = f1.strftime("%Y") + f1.strftime("%m") + f2.strftime("%Y") + f2.strftime("%m")
-        ano_entrega = f3.year            
+        ano_entrega = f3.year
         t = [f1.strftime("%B") + "-" + f2.strftime("%B"), f3.strftime("%B"), ano_entrega, v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8]]  
         meta = cantidad_periodo * duracion
         teorico = (meta) * (fgs_sobre_cien / 100)
@@ -734,6 +735,7 @@ def crear_liberacion(idacuerdo, idconsultor, consultor, idcliente, cliente, mes_
         f1 = date(ano_ini, mes_ini, 1)
         f2 = date(ano_fin, mes_fin, 1)
         f3 = f2  + relativedelta(months=1)
+        print(f1,f2,f3,"E")
         v = [0,0,0,0,0,0,0,0,0]
         periodo = f1.strftime("%Y") + f1.strftime("%m") + f2.strftime("%Y") + f2.strftime("%m")
         ano_entrega = f3.year            
@@ -754,10 +756,11 @@ def crear_liberacion(idacuerdo, idconsultor, consultor, idcliente, cliente, mes_
         periodo = f1.strftime("%Y") + f1.strftime("%m") + f3.strftime("%Y") + f3.strftime("%m")
         periodo2 =  f4.strftime("%Y") + f4.strftime("%m") + f2.strftime("%Y") + f2.strftime("%m")
         periodo3 =  f1.strftime("%Y") + f1.strftime("%m") + f2.strftime("%Y") + f2.strftime("%m")
-        ano_entrega = f5.year
-        t = [f1.strftime("%B") + "-" + f3.strftime("%B"), f4.strftime("%B"), ano_entrega, v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8]]
-        t2 = [f4.strftime("%B") + "-" + f2.strftime("%B"), f5.strftime("%B"), ano_entrega, v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8]]
-        t3 = [f1.strftime("%B") + "-" + f2.strftime("%B"), f5.strftime("%B"), ano_entrega, v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8]]
+        ano_entrega1 = f3.year
+        ano_entrega2 = f5.year
+        t = [f1.strftime("%B") + "-" + f3.strftime("%B"), f4.strftime("%B"), ano_entrega1, v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8]]
+        t2 = [f4.strftime("%B") + "-" + f2.strftime("%B"), f5.strftime("%B"), ano_entrega2, v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8]]
+        t3 = [f1.strftime("%B") + "-" + f2.strftime("%B"), f5.strftime("%B"), ano_entrega2, v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8]]
         meta = cantidad_periodo * duracion
         teorico = (meta) * (fgs_sobre_cien / 100)
         cumplimiento = 0
@@ -1117,7 +1120,7 @@ def totalizar_ventas(idacuerdo):
     cur = conn.cursor()    
     # Trae los datos de liberacion
     msql = "SELECT * from dt_liberacion where idacuerdo = '" + idacuerdo + "' order by corte "
-    print(msql)
+    #print(msql)
     cur.execute(msql)
     cortes = cur.fetchall()
     # Ultimo corte
