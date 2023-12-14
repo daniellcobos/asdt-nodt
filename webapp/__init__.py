@@ -11,7 +11,7 @@ import sys
 from flask_login import LoginManager,login_user,logout_user,login_required,current_user
 import smtplib, ssl
 from email.mime.text import MIMEText
-
+import hashlib
 #from apscheduler.schedulers.background import BackgroundScheduler
 #from apscheduler.triggers.interval import IntervalTrigger
 #import atexit

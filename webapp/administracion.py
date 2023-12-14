@@ -16,7 +16,7 @@ import psycopg2.extras
 import logging
 
 from webapp import app
-import hashlib
+#import hashlib
 app.config.from_object('configuraciones.local')
 db_connection_string = app.config["POSTGRESQL_CONNECTION"]
 salt = app.config["APP_SECRET_KEY"]
@@ -75,11 +75,13 @@ def usuarios_guardar():
     usuario = request.form.getlist('usuario')
     email = request.form.getlist('email')
     password = request.form.getlist('password')[0]
+    '''
     saltpass = salt+password
     print(saltpass)
     m = hashlib.sha3_256()
     m.update(saltpass.encode('utf-8'))
     password = m.hexdigest()
+    '''
     perfil = request.form.getlist('perfil')
     pais = request.form.getlist('pais')
     
@@ -240,7 +242,7 @@ def importar_ventas():
             idcliente = str(row[1])
             venta_mes = str(row[6])
             venta_ano = str(row[7])
-            sap_id = str(row[0])
+            sap_id = str(row[0]).upper()
             pais = str(row[1])
             print(pais,row[1])
             producto = str(row[2])
@@ -268,7 +270,7 @@ def importar_ventas():
 def ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion):
     msql = "INSERT INTO dt_ventas "
     msql = msql + "(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, idproducto, cantidad, idveeva, idacuerdo, idperiodo, observacion)"
-    msql = msql + " VALUES ('" +  invoice_date + "','"  + venta_mes + "','"  + venta_ano + "','"  + sap_id + "','"  + pais + "','"  + producto + "','"  + idproducto + "',"  + cantidad + ",'"  + idveeva + "','"  + idacuerdo + "','"  + idperiodo + "','"  + observacion + "')"
+    msql = msql + " VALUES ('" +  invoice_date + "','"  + venta_mes + "','"  + venta_ano + "','"  + sap_id.upper() + "','"  + pais + "','"  + producto + "','"  + idproducto + "',"  + cantidad + ",'"  + idveeva + "','"  + idacuerdo + "','"  + idperiodo + "','"  + observacion + "')"
     mensaje = ""
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
@@ -302,7 +304,7 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
   df1
 
   cliente = df1.idcliente
-  clientes.append(cliente.iloc[0])
+  clientes.append(cliente.iloc[0].upper())
 
   # 2. identifica los clientes multiples
   msql = "SELECT * FROM dt_cliente_multiple where idacuerdo = '" + idacuerdo + "'"
@@ -316,7 +318,7 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
 
   for index, row in df2.iterrows():
     s = row.iloc[2]
-    clientes.append(s)  
+    clientes.append(s.upper())
 
 
   # Identifica los periodos de un acuerdo
@@ -338,6 +340,7 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
 
 
   # Para cada cliente de un acuerdo busca si hay ventas y le pone el id del acuerdo
+  print(clientes)
   for cliente in clientes:  
     for periodo in periodos:    
       msql = "update dt_ventas set idacuerdo = '"+ idacuerdo + "' where sap_id = '" + cliente + "' and idperiodo = '" + periodo.strftime("%Y%m") + "'"
@@ -354,7 +357,7 @@ def ventasxacuerdos1(pais):
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
 
-    msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' "
+    msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' order by fecha_creacion desc LIMIT 1500 "
     cur.execute(msql)
 
     row = cur.fetchall()

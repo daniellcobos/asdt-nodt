@@ -958,8 +958,9 @@ def ventasxacuerdos():
     cur = conn.cursor()
     msql = " select idcliente, idacuerdo from dt_acuerdo"
     msql = msql + " union all "
-    msql = msql + " select idcliente, idacuerdo from dt_cliente_multiple"
+    msql = msql + " select upper(idcliente), idacuerdo from dt_cliente_multiple"
     msql = msql + " order by idacuerdo asc"
+    print(msql)
 
     #msql = "select periodo,substring(cast(periodo as varchar),1,6) as ini, substring(cast(periodo as varchar),7,12) as fin,idacuerdo,corte, idcliente from dt_liberacion where idacuerdo = 'AR-20210001' order by idacuerdo,corte"
 
