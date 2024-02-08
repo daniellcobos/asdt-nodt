@@ -206,14 +206,35 @@ def acuerdos_add(idconsultor, usuario, pais):
     cur.execute(msql)
     id_max = cur.fetchall() 
     # Envia la tabla maestra de acuerdos
-    msql = "select * from dt_freegood where pais = '" + pais + "' and usar = 1 order by idbanda "
-    cur.execute(msql)
-    freegoods = cur.fetchall() 
-    print(freegoods)
-    # Envia la tabla maestra de acuerdos
-    msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and usar = 1 order by idplazo"
-    cur.execute(msql)
-    plazos = cur.fetchall()     
+
+    # Envia la tabla maestra de acuerdos segun nivel
+    if session["nivel"] == -1:
+        msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and usar = 1 order by idplazo"
+        cur.execute(msql)
+        plazos = cur.fetchall()
+        msql = "select * from dt_freegood where pais = '" + pais + "' and usar = 1 order by idbanda "
+        cur.execute(msql)
+        freegoods = cur.fetchall()
+        # range of freegoods
+        idrange =str(tuple(["246"]+[ str(x) for x in range(274,286)]  + ["296","297","335"] + [ str(x) for x in range(336,351)] ))
+        msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and idfreegood in " + idrange + " order by idplazo"
+        cur.execute(msql)
+        plazos2 = cur.fetchall()
+        plazos = plazos + plazos2
+        msql = "select * from dt_freegood where pais = '" + pais + "' and idfreegood in " + idrange + " order by idplazo,banda"
+        print(msql)
+        cur.execute(msql)
+        freegoods2 = cur.fetchall()
+        freegoods = freegoods + freegoods2
+
+    else:
+        msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and usar = 1 order by idplazo"
+        cur.execute(msql)
+        plazos = cur.fetchall()
+        msql = "select * from dt_freegood where pais = '" + pais + "' and usar = 1 order by idbanda "
+        cur.execute(msql)
+        freegoods = cur.fetchall()
+
     cur.close()
     conn.close()
     return render_template('acuerdos/acuerdos_add.html', idconsultor = idconsultor, usuario = usuario, pais = pais, clientes = clientes, id_max = id_max, freegoods = freegoods, plazos = plazos)

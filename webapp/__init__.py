@@ -61,10 +61,10 @@ def login():
         # Create variables for easy access
         username = request.form['username']
         password = request.form['password']
-        saltpass = salt+password
-        m = hashlib.sha3_256()
-        m.update(saltpass.encode('utf-8'))
-        password = m.hexdigest()
+        #saltpass = salt+password
+        #m = hashlib.sha3_256()
+        #m.update(saltpass.encode('utf-8'))
+        #password = m.hexdigest()
         print(password)
         # Check if account exists using postgress
         msql =  "SELECT * FROM dt_usuarios WHERE email = '" + username + "' AND contrasena = '" + password + "'"

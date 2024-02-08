@@ -357,7 +357,7 @@ def ventasxacuerdos1(pais):
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
 
-    msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' order by fecha_creacion desc LIMIT 1500 "
+    msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' order by fecha_creacion desc LIMIT 3500 "
     cur.execute(msql)
 
     row = cur.fetchall()
@@ -374,6 +374,8 @@ def ventasxacuerdos1(pais):
     conn.close() 
 
     return "Termino"
+
+
 
 def totalizar_ventas(f1,f2,idacuerdo,porcentaje):
     # Calcula las ventas del periodo
