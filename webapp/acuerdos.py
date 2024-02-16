@@ -318,6 +318,7 @@ def acuerdos_guardar():
 
 @app.route('/acuerdos_editar/<string:idacuerdo>', methods=['GET','POST'])
 def acuerdos_editar(idacuerdo):
+    pais = session['pais']
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
     # Busca los clientes del consultor
@@ -328,19 +329,39 @@ def acuerdos_editar(idacuerdo):
     # Busca los consultores
     msql =  "SELECT idusuario,usuario FROM dt_usuarios where nivel = 1 and pais = '" + session['pais'] + "'"
     cur.execute(msql)
-    consultores = cur.fetchall() 
+    consultores = cur.fetchall()
+
     # Busca el registro a editar
     msql = "select *  from dt_acuerdo where idacuerdo = '" + idacuerdo + "'"
     cur.execute(msql)
-    registro = cur.fetchone() 
-    # Envia la tabla maestra de acuerdos
-    msql = "select * from dt_freegood where pais = '" + session['pais'] + "' and usar = 1 order by idbanda"
-    cur.execute(msql)
-    freegoods = cur.fetchall() 
-    # Envia la tabla maestra de acuerdos
-    msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + session['pais'] + "' and usar = 1 order by idplazo"
-    cur.execute(msql)
-    plazos = cur.fetchall()
+    registro = cur.fetchone()
+    if session["nivel"] == -1:
+        msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and usar = 1 order by idplazo"
+        cur.execute(msql)
+        plazos = cur.fetchall()
+        msql = "select * from dt_freegood where pais = '" + pais + "' and usar = 1 order by idbanda "
+        cur.execute(msql)
+        freegoods = cur.fetchall()
+        # range of freegoods
+        idrange = str(tuple(
+            ["246"] + [str(x) for x in range(274, 286)] + ["296", "297", "335"] + [str(x) for x in range(336, 351)]))
+        msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and idfreegood in " + idrange + " order by idplazo"
+        cur.execute(msql)
+        plazos2 = cur.fetchall()
+        plazos = plazos + plazos2
+        msql = "select * from dt_freegood where pais = '" + pais + "' and idfreegood in " + idrange + " order by idplazo,banda"
+        print(msql)
+        cur.execute(msql)
+        freegoods2 = cur.fetchall()
+        freegoods = freegoods + freegoods2
+
+    else:
+        msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and usar = 1 order by idplazo"
+        cur.execute(msql)
+        plazos = cur.fetchall()
+        msql = "select * from dt_freegood where pais = '" + pais + "' and usar = 1 order by idbanda "
+        cur.execute(msql)
+        freegoods = cur.fetchall()
 
     cur.close()
     conn.close()
