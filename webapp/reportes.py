@@ -620,3 +620,5 @@ def delete_download_file(idacuerdo,name):
     except Exception as e:
         print(e)
         return 'error :' + str(e)
+
+

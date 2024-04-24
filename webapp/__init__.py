@@ -65,7 +65,7 @@ def login():
         #m = hashlib.sha3_256()
         #m.update(saltpass.encode('utf-8'))
         #password = m.hexdigest()
-        print(password)
+
         # Check if account exists using postgress
         msql =  "SELECT * FROM dt_usuarios WHERE email = '" + username + "' AND contrasena = '" + password + "'"
         cur.execute(msql)
@@ -95,6 +95,8 @@ def login():
 # Este es el decorador de seguridad, se corre cada vez que alguien hace un request a cualquier pagina
 @app.before_request
 def before_request():
+    if (request.endpoint == 'api_acuerdos'):
+        return
     if (request.endpoint == 'recuperar_acceso'):
         return
     session.permanent = True    
@@ -198,7 +200,7 @@ def precios_exportar():
     fmt = wb.add_format({'bg_color': '#0073b7', 'font_color': '#FFFFFF', 'bold': True, 'text_wrap': True, 'align': 'center', 'valign': 'vcenter'})
     for col_num, value in enumerate(sql_data.columns.values):
         worksheet.write(0, col_num , value, fmt)
-    writer.save()
+    writer.close()
     cur.close()
     conn.close()
 
@@ -234,7 +236,7 @@ def freegoods_exportar():
     print(sql_data)
     for col_num, value in enumerate(sql_data.columns.values):
         worksheet.write(0, col_num, value, fmt)
-    writer.save()
+    writer.close()
     cur.close()
     conn.close()
 

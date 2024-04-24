@@ -15,11 +15,12 @@ from xlsxwriter import Workbook
 import smtplib, ssl
 from email.mime.text import MIMEText
 from webapp import app
+from flask_cors import CORS
 app.config.from_object('configuraciones.local')
 db_connection_string = app.config["POSTGRESQL_CONNECTION"]
 
 locale.setlocale(locale.LC_ALL, 'es_CO.utf8')
-
+CORS(app, origins=["http://your-trusted-domain.com"])
 from .utilidades import *
 
 # Variable donde se activa la auditoria
@@ -734,6 +735,7 @@ def crear_liberacion(idacuerdo, idconsultor, consultor, idcliente, cliente, mes_
 
     # Borra la anterior liberacion si existe para no crear duplicados
     msql =  "DELETE from dt_liberacion where idacuerdo = '" + str(idacuerdo) + "'"
+
     cur.execute(msql)
     conn.commit()
 
@@ -868,6 +870,7 @@ def insertar_liberacion(periodo, pais, idacuerdo, consultor, idcliente, cliente,
     msql = msql + ", '" + str(idacuerdo) +"', '" + str(consultor) +"', '" + str(idcliente) +"', '" + str(cliente) +"', " + str(duracion) +", '" + str(corte) + "','" + str(detalle_periodo) + "', '" + str(mes_entrega) + "', " + str(ano_entrega) + ", " + str(meta_corte) + ", " + str(fgs_sobre_cien) + ", " + str(fgs_teoricos)
     msql = msql + ", "  + str(total_venta) +", "+ str(botox) +", "+ str(ultra) +", "+ str(ultra_plus) +", "+ str(volbella) +", "+ str(volift) +", "+ str(volite) +", "+ str(voluma) +", "+ str(volux) +", "+ str(total_fgs)
     msql = msql + ", '" + str(idcliente1) +"', '"+ str(cliente1) +"', '"+ str(idcliente2) +"', '"+ str(cliente2) +"', '"+ str(idcliente3) + "', '"+ str(cliente3) +"', '"+ str(idcliente4) + "', '"+ str(cliente4) +"'); "
+    print(msql)
     cur.execute(msql)
     conn.commit()
     cur.close()
@@ -1435,3 +1438,68 @@ def totalizar_ventas(idacuerdo):
     cur.close()
     conn.close()       
     return "Liberacion Actualizada!!!"
+
+@app.route('/endpoint/acuerdos/<string:pais>', methods=['GET'])
+def api_acuerdos(pais):
+    # Verifica que los acuerdos esten vencidos
+    print(request.environ)
+    if request.environ['REMOTE_ADDR'] == '127.0.0.1':
+        acuerdos_sin_vigencia()
+        conn = psycopg2.connect(db_connection_string)
+        cur = conn.cursor()
+        # Busca acuerdos del usuario
+        if session['nivel'] == 1:
+            return jsonify({'mensaje':'no autorizado'})
+        else:
+            msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "'"
+            # msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, da.cantidad_periodo from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' order by dl.idacuerdo,dl.corte"
+        cur.execute(msql)
+        data = cur.fetchall()
+        dataarr = []
+        for d in data:
+            datadict = {
+                "idacuerdo" : d[0],
+                "idconsultor": d[1],
+                "consultor": d[2],
+                "idcliente": d[3],
+                "cliente": d[4],
+                "mesini":d[5],
+                "anoini":d[6],
+                "tipoacuerdo":d[7],
+                "cantidad_periodo":d[8],
+                "duracion": d[9],
+                "unidades_total": d[10],
+                "banda": d[11],
+                "freegoods":d[12],
+                "mes_fin":d[13],
+                "ano_fin":d[14],
+                "vigente":d[15],
+                "pais":d[16],
+                "fecha_creacion":d[17],
+            }
+            dataarr.append(datadict)
+        print(datadict)
+        archivequantity = []
+        for r in data:
+            path = os.path.join(app.config['UPLOAD_FOLDER'], r[0])
+            try:
+                archivequantity.append(len(os.listdir(path)))
+            except:
+                archivequantity.append(0)
+        # precios
+        msql = "SELECT * FROM dt_precios where pais = %s order by periodo desc"
+        cur.execute(msql, (session['pais'],))
+        precios = []
+        for e in cur.fetchall():
+            precios.append(list(e))
+        msql = "Select distinct producto from dt_precios where pais = %s"
+        cur.execute(msql, (session['pais'],))
+        nombres = []
+        for e in cur.fetchall():
+            nombres.append(list(e))
+        cur.close()
+        conn.close()
+
+        return jsonify(dataarr)
+    else:
+        return jsonify({'mensaje': 'no autorizado'})
