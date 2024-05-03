@@ -307,19 +307,34 @@
 
     // Calcula los freegoods
     mdescuento = bandas[i].descuento;
-    var mregla = bandas[i].Regla;    
+    var mregla = bandas[i].Regla;
+
     var n = mregla.search("%");
+    console.log(n)
     // Si es % calcula el valor si es 1/6 calcula el modulo
+
+      // Puede que la base de datos devuelva un decimal
+
     if (n > 0)
     {
       mporcentaje =mregla.replace("%","");
-      document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value * (mporcentaje/100));
+      console.log(document.getElementById("unidades_total").value,mporcentaje)
+      document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value * (mporcentaje/100)) ;
       
     }
     else
-    {      
-      document.getElementById("freegoods").value = parseInt(document.getElementById("unidades_total").value / 6);
+    {
+        const mreglanum = parseFloat(mregla)
+         // Puede que la base de datos devuelva un decimal
+        if (mreglanum !== (1/6)){
+            console.log(document.getElementById("unidades_total").value * mreglanum)
+             document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value * mreglanum);
+        }
+        else{
+            document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value / 6);
       mporcentaje = 1/6;
+        }
+
     }
 
   }

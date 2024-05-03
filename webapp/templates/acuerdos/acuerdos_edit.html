@@ -390,14 +390,23 @@
     if (n > 0)
     {
       mporcentaje =mregla.replace("%","");
+      console.log(document.getElementById("unidades_total").value,mporcentaje)
+      document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value * (mporcentaje/100)) ;
 
-      document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value * (mporcentaje/100));
-      
     }
     else
-    {      
-      mporcentaje = 17;
-      document.getElementById("freegoods").value = parseInt(document.getElementById("unidades_total").value / 6);
+    {
+        const mreglanum = parseFloat(mregla)
+         // Puede que la base de datos devuelva un decimal
+        if (mreglanum !== (1/6)){
+            console.log(document.getElementById("unidades_total").value * mreglanum)
+             document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value * mreglanum);
+        }
+        else{
+            document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value / 6);
+      mporcentaje = 1/6;
+        }
+
     }
     console.log(mporcentaje);
 

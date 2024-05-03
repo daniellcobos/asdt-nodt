@@ -132,12 +132,12 @@ def usuarios_actualizar():
     email = request.form.getlist('email')
     password = request.form.getlist('password')[0]
     perfil = request.form.getlist('perfil')
-    saltpass = salt + password
-    print(saltpass)
+    #saltpass = salt + password
+    #print(saltpass)
     pais = request.form.getlist('pais')
-    m = hashlib.sha3_256()
-    m.update(saltpass.encode('utf-8'))
-    password = m.hexdigest()
+    #m = hashlib.sha3_256()
+    #m.update(saltpass.encode('utf-8'))
+    #password = m.hexdigest()
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
     msql = "UPDATE dt_usuarios "
