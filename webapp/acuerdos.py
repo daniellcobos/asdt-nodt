@@ -68,8 +68,13 @@ def misacuerdos():
 def acuerdosdetalle(idconsultor, usuario, pais):
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
+    # Obtiene fecha de hoy
+    today = datetime.today()
+    currentyear = today.year
+    limityear = currentyear - 3
+    print(limityear)
     # Busca acuerdos del usuario
-    msql =  "SELECT * FROM dt_acuerdo where idconsultor = '" + idconsultor + "'"
+    msql =  "SELECT * FROM dt_acuerdo where idconsultor = '" + idconsultor + "'  and date_part('year',fecha_creacion) > " + str(limityear)
     cur.execute(msql)
     data = cur.fetchall()   
 
@@ -97,6 +102,50 @@ def acuerdosdetalle(idconsultor, usuario, pais):
     cur.close()
     conn.close()
     return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais)
+
+@app.route('/acuerdosdetalleantiguos/<string:idconsultor>/<string:usuario>/<string:pais>', methods=['GET'])
+def acuerdosdetalleantiguos(idconsultor, usuario, pais):
+    conn = psycopg2.connect(db_connection_string)
+    cur = conn.cursor()
+    # Obtiene fecha de hoy
+    today = datetime.today()
+    currentyear = today.year
+    limityear = currentyear - 3
+    print(limityear)
+    # Busca acuerdos del usuario
+    msql =  "SELECT * FROM dt_acuerdo where idconsultor = '" + idconsultor + "'  and date_part('year',fecha_creacion) <= " + str(limityear)
+    cur.execute(msql)
+    data = cur.fetchall()
+
+    mdata = []
+    for row in data:
+        # Para cada acuerdo busca los clientes multiples
+        msql = "SELECT COUNT(idcliente) from dt_cliente_multiple where idacuerdo = '" + row[0] + "'"
+        #cur.execute(msql)
+        nclientes = cur.fetchone()
+        t1 = 'nd'
+        # Convierte a una lista y agrega la columna como nuevo elemento, aqui se guarda la suma de clientes adicionales x acuerdo
+        row2 = list(row)
+        row2.append(t1)
+        # Para cada aucerdo busca Liberacion Detalle
+        #msql = "Select sum(total_fgs) from dt_liberacion where idacuerdo = '" + row[0] + "' and corte = '1'"
+        #cur.execute(msql)
+        nliberacion = cur.fetchone()
+        t2 = 'nd'
+        # Para cada aucerdo busca Liberacion Cierre
+        t3 = t2
+        row2.append(t2)
+        row2.append(t3)
+        mdata.append(row2)
+
+    cur.close()
+    conn.close()
+    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais)
+
+
+
+
+
 
 @app.route('/acuerdosdetalle_exportar/<string:idconsultor>', methods=['GET'])
 def acuerdosdetalle_exportar(idconsultor):
@@ -201,7 +250,7 @@ def acuerdos_add(idconsultor, usuario, pais):
     cur.execute(msql)
     clientes = cur.fetchall() 
     # Busca los maximos id de acuerdos por año para incrementarlo
-    msql = "select ano_ini, MAX(SUBSTR(cast (idacuerdo as text), 4,9)) as registro   from dt_acuerdo where pais = '" + pais + "' GROUP BY ano_ini  order by registro desc"
+    #msql = "select ano_ini, MAX(SUBSTR(cast (idacuerdo as text), 4,9)) as registro   from dt_acuerdo where pais = '" + pais + "' GROUP BY ano_ini  order by registro desc"
     msql = "select MAX(SUBSTR(cast (idacuerdo as text), 4,9)) as registro   from dt_acuerdo where pais = '" + pais + "' order by registro desc"
     print(msql)
     cur.execute(msql)

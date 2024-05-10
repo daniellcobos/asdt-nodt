@@ -327,6 +327,7 @@
         const mreglanum = parseFloat(mregla)
          // Puede que la base de datos devuelva un decimal
         if (mreglanum !== (1/6)){
+            mporcentaje = mreglanum
             console.log(document.getElementById("unidades_total").value * mreglanum)
              document.getElementById("freegoods").value = Math.round(document.getElementById("unidades_total").value * mreglanum);
         }
