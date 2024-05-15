@@ -72,7 +72,6 @@ def acuerdosdetalle(idconsultor, usuario, pais):
     today = datetime.today()
     currentyear = today.year
     limityear = currentyear - 3
-    print(limityear)
     # Busca acuerdos del usuario
     msql =  "SELECT * FROM dt_acuerdo where idconsultor = '" + idconsultor + "'  and date_part('year',fecha_creacion) > " + str(limityear)
     cur.execute(msql)
@@ -101,7 +100,7 @@ def acuerdosdetalle(idconsultor, usuario, pais):
 
     cur.close()
     conn.close()
-    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais)
+    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais, url = "acuerdosdetalleantiguos")
 
 @app.route('/acuerdosdetalleantiguos/<string:idconsultor>/<string:usuario>/<string:pais>', methods=['GET'])
 def acuerdosdetalleantiguos(idconsultor, usuario, pais):
@@ -140,7 +139,7 @@ def acuerdosdetalleantiguos(idconsultor, usuario, pais):
 
     cur.close()
     conn.close()
-    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais)
+    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais, url = "acuerdosdetalle")
 
 
 

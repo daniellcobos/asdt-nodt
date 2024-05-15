@@ -25,7 +25,13 @@
     <td> {{ usuario }} </td>
     <td>{{ pais }}</td>
     <td><a id='btn_agregar' class="btn btn-primary" href="/acuerdos_add/{{ idconsultor }}/{{ usuario }}/{{ pais }}" role="button"  data-toggle="tooltip" data-placement="top" title="Agregar Acuerdo">Agregar</a></td>
-      <td><a id='btn_aa' class="btn btn-primary" href="/acuerdosdetalleantiguos/{{ idconsultor }}/{{ usuario }}/{{ pais }}" role="button"  data-toggle="tooltip" data-placement="top" title="Ver Acuerdos Antiguos">Ver Acuerdos Antiguos</a></td>
+      <td><a id='btn_aa' class="btn btn-primary" href="/{{ url }}/{{ idconsultor }}/{{ usuario }}/{{ pais }}" role="button"  data-toggle="tooltip" data-placement="top" title="Ver Acuerdos Antiguos">
+          {% if url == "acuerdosdetalleantiguos" %}
+            Ver Acuerdos Antiguos
+          {% else %}
+            Ver Acuerdos Recientes
+          {% endif %}
+      </a></td>
   </tr>
 </table> 
 <hr>
