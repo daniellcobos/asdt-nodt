@@ -346,3 +346,43 @@ update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or
 update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
 update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
 update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );
+update dt_acuerdo set vigente = 0 where (ano_fin = (2024) and mes_fin <= (4)) or ano_fin < (2024)
+update dt_cliente_multiple set vigente = 0 from dt_acuerdo where dt_cliente_multiple.idacuerdo in(select dt_acuerdo.idacuerdo where dt_acuerdo.vigente = 0  );

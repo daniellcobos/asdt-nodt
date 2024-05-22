@@ -28,7 +28,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = app.config["APP_SECRET_KEY"]
 db_connection_string = app.config["POSTGRESQL_CONNECTION"]
 app.url_map.strict_slashes = False
-CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Llamar los modulos de la app
 from .clientes import *

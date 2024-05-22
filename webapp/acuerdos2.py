@@ -15,12 +15,11 @@ from xlsxwriter import Workbook
 import smtplib, ssl
 from email.mime.text import MIMEText
 from webapp import app
-from flask_cors import CORS
 app.config.from_object('configuraciones.local')
 db_connection_string = app.config["POSTGRESQL_CONNECTION"]
 
 locale.setlocale(locale.LC_ALL, 'es_CO.utf8')
-CORS(app, origins=["http://your-trusted-domain.com"])
+
 from .utilidades import *
 
 # Variable donde se activa la auditoria
@@ -68,12 +67,8 @@ def misacuerdos():
 def acuerdosdetalle(idconsultor, usuario, pais):
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
-    # Obtiene fecha de hoy
-    today = datetime.today()
-    currentyear = today.year
-    limityear = currentyear - 3
     # Busca acuerdos del usuario
-    msql =  "SELECT * FROM dt_acuerdo where idconsultor = '" + idconsultor + "'  and date_part('year',fecha_creacion) > " + str(limityear)
+    msql =  "SELECT * FROM dt_acuerdo where idconsultor = '" + idconsultor + "'"
     cur.execute(msql)
     data = cur.fetchall()   
 
@@ -100,51 +95,7 @@ def acuerdosdetalle(idconsultor, usuario, pais):
 
     cur.close()
     conn.close()
-    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais, url = "acuerdosdetalleantiguos")
-
-@app.route('/acuerdosdetalleantiguos/<string:idconsultor>/<string:usuario>/<string:pais>', methods=['GET'])
-def acuerdosdetalleantiguos(idconsultor, usuario, pais):
-    conn = psycopg2.connect(db_connection_string)
-    cur = conn.cursor()
-    # Obtiene fecha de hoy
-    today = datetime.today()
-    currentyear = today.year
-    limityear = currentyear - 3
-    print(limityear)
-    # Busca acuerdos del usuario
-    msql =  "SELECT * FROM dt_acuerdo where idconsultor = '" + idconsultor + "'  and date_part('year',fecha_creacion) <= " + str(limityear)
-    cur.execute(msql)
-    data = cur.fetchall()
-
-    mdata = []
-    for row in data:
-        # Para cada acuerdo busca los clientes multiples
-        msql = "SELECT COUNT(idcliente) from dt_cliente_multiple where idacuerdo = '" + row[0] + "'"
-        #cur.execute(msql)
-        nclientes = cur.fetchone()
-        t1 = 'nd'
-        # Convierte a una lista y agrega la columna como nuevo elemento, aqui se guarda la suma de clientes adicionales x acuerdo
-        row2 = list(row)
-        row2.append(t1)
-        # Para cada aucerdo busca Liberacion Detalle
-        #msql = "Select sum(total_fgs) from dt_liberacion where idacuerdo = '" + row[0] + "' and corte = '1'"
-        #cur.execute(msql)
-        nliberacion = cur.fetchone()
-        t2 = 'nd'
-        # Para cada aucerdo busca Liberacion Cierre
-        t3 = t2
-        row2.append(t2)
-        row2.append(t3)
-        mdata.append(row2)
-
-    cur.close()
-    conn.close()
-    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais, url = "acuerdosdetalle")
-
-
-
-
-
+    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais)
 
 @app.route('/acuerdosdetalle_exportar/<string:idconsultor>', methods=['GET'])
 def acuerdosdetalle_exportar(idconsultor):
@@ -249,7 +200,7 @@ def acuerdos_add(idconsultor, usuario, pais):
     cur.execute(msql)
     clientes = cur.fetchall() 
     # Busca los maximos id de acuerdos por año para incrementarlo
-    #msql = "select ano_ini, MAX(SUBSTR(cast (idacuerdo as text), 4,9)) as registro   from dt_acuerdo where pais = '" + pais + "' GROUP BY ano_ini  order by registro desc"
+    msql = "select ano_ini, MAX(SUBSTR(cast (idacuerdo as text), 4,9)) as registro   from dt_acuerdo where pais = '" + pais + "' GROUP BY ano_ini  order by registro desc"
     msql = "select MAX(SUBSTR(cast (idacuerdo as text), 4,9)) as registro   from dt_acuerdo where pais = '" + pais + "' order by registro desc"
     print(msql)
     cur.execute(msql)
@@ -336,23 +287,11 @@ def acuerdos_guardar():
            "select idcliente, idacuerdo from dt_acuerdo where idacuerdo in (select idacuerdo from dt_cliente_multiple where idcliente = %s) and vigente = 1 order by idacuerdo asc"
     cur.execute(msql, (idcliente[0], idcliente[0]))
     result=cur.fetchone()
-    #Para acuerdos que son parte de un historico que no han sido subidos
-    yfin = int(ano_fin[0])
-    mfin = int(mes_fin[0])
-    fecha_final = datetime(yfin,mfin,1)
-    today = datetime.today()
-    tmes = datetime(today.year,today.month,1)
-    actual = fecha_final >= tmes
-    if result != None:
-        if session['nivel'] == -1 and actual:
-            mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result)
-            print(mensaje)
-            return mensaje
-        elif session['nivel'] != -1:
-            mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result)
-            print(mensaje)
-            return mensaje
 
+    if result != None:
+        mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result)
+        print(mensaje)
+        return mensaje
 
     msql = "INSERT INTO dt_acuerdo "
     msql = msql + "(idacuerdo, idconsultor, consultor, idcliente, cliente, mes_ini, ano_ini, tipo_acuerdo, cantidad_periodo, duracion, unidades_total, banda, freegoods, mes_fin, ano_fin, vigente, pais, num_entregas, num_entregas_cierre, anulado, entrega_x_porcentaje, porc_piso_entrega, porc_cumplimiento, fgs_sobre_cien, porc_descuento, aprobado)"
@@ -795,7 +734,6 @@ def crear_liberacion(idacuerdo, idconsultor, consultor, idcliente, cliente, mes_
 
     # Borra la anterior liberacion si existe para no crear duplicados
     msql =  "DELETE from dt_liberacion where idacuerdo = '" + str(idacuerdo) + "'"
-
     cur.execute(msql)
     conn.commit()
 
@@ -930,7 +868,6 @@ def insertar_liberacion(periodo, pais, idacuerdo, consultor, idcliente, cliente,
     msql = msql + ", '" + str(idacuerdo) +"', '" + str(consultor) +"', '" + str(idcliente) +"', '" + str(cliente) +"', " + str(duracion) +", '" + str(corte) + "','" + str(detalle_periodo) + "', '" + str(mes_entrega) + "', " + str(ano_entrega) + ", " + str(meta_corte) + ", " + str(fgs_sobre_cien) + ", " + str(fgs_teoricos)
     msql = msql + ", "  + str(total_venta) +", "+ str(botox) +", "+ str(ultra) +", "+ str(ultra_plus) +", "+ str(volbella) +", "+ str(volift) +", "+ str(volite) +", "+ str(voluma) +", "+ str(volux) +", "+ str(total_fgs)
     msql = msql + ", '" + str(idcliente1) +"', '"+ str(cliente1) +"', '"+ str(idcliente2) +"', '"+ str(cliente2) +"', '"+ str(idcliente3) + "', '"+ str(cliente3) +"', '"+ str(idcliente4) + "', '"+ str(cliente4) +"'); "
-    print(msql)
     cur.execute(msql)
     conn.commit()
     cur.close()
@@ -1498,66 +1435,3 @@ def totalizar_ventas(idacuerdo):
     cur.close()
     conn.close()       
     return "Liberacion Actualizada!!!"
-
-@app.route('/endpoint/acuerdos/<string:pais>/vigente', methods=['GET'])
-def api_acuerdos(pais):
-    # Verifica que los acuerdos esten vencidos
-    authorization = request.headers.get('Authorization')
-    if authorization == "ASJNDFJDFJKSDFJSDF":
-        acuerdos_sin_vigencia()
-        conn = psycopg2.connect(db_connection_string)
-        cur = conn.cursor()
-        # Busca acuerdos del usuario
-
-        msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' and vigente=1"
-        # msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, da.cantidad_periodo from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' order by dl.idacuerdo,dl.corte"
-        cur.execute(msql)
-        data = cur.fetchall()
-        dataarr = []
-        for d in data:
-            datadict = {
-                "idacuerdo" : d[0],
-                "idconsultor": d[1],
-                "consultor": d[2],
-                "idcliente": d[3],
-                "cliente": d[4],
-                "mes_ini":d[5],
-                "ano_ini":d[6],
-                "tipoacuerdo":d[7],
-                "cantidad_periodo":d[8],
-                "duracion": d[9],
-                "unidades_total": d[10],
-                "banda": d[11],
-                "freegoods":d[12],
-                "mes_fin":d[13],
-                "ano_fin":d[14],
-                "vigente":d[15],
-                "pais":d[16],
-                "fecha_creacion":d[17],
-            }
-            dataarr.append(datadict)
-        print(datadict)
-        archivequantity = []
-        for r in data:
-            path = os.path.join(app.config['UPLOAD_FOLDER'], r[0])
-            try:
-                archivequantity.append(len(os.listdir(path)))
-            except:
-                archivequantity.append(0)
-        # precios
-        msql = "SELECT * FROM dt_precios where pais = %s order by periodo desc"
-        cur.execute(msql, (pais,))
-        precios = []
-        for e in cur.fetchall():
-            precios.append(list(e))
-        msql = "Select distinct producto from dt_precios where pais = %s"
-        cur.execute(msql, (pais,))
-        nombres = []
-        for e in cur.fetchall():
-            nombres.append(list(e))
-        cur.close()
-        conn.close()
-
-        return jsonify(dataarr)
-    else:
-        return jsonify({"Error":"No Autorizado"})
