@@ -47,17 +47,24 @@ def misacuerdos():
     msql = nivel.get(session['nivel'], "Invalido")         
     cur.execute(msql)
     rows = cur.fetchall() 
-    data = []         
+    data = []
+    msql = "Select idconsultor,count(idacuerdo) from dt_acuerdo group by idconsultor"
+    cur.execute(msql)
+    count_idacuerdos = cur.fetchall()
+    count_idacuerdos = dict((x, y) for x, y in count_idacuerdos)
     for row in rows:
         # Para cada usuario busca los acuerdos
-        msql =  " SELECT count(idacuerdo) FROM 	dt_acuerdo INNER JOIN dt_usuarios ON idconsultor = idusuario WHERE idusuario = '" + row[0] + "';"
-        cur.execute(msql)
-        nacuerdos = cur.fetchone() 
-        nacuerdos = nacuerdos[0]
+        #msql =  " SELECT count(idacuerdo) FROM 	dt_acuerdo INNER JOIN dt_usuarios ON idconsultor = idusuario WHERE idusuario = '" + row[0] + "';"
+        #cur.execute(msql)
+        #nacuerdos = cur.fetchone()
+        #nacuerdos = nacuerdos[0]
         a0 = row[0]
         a1 = row[1]
         a2 = row[5]
-        a3 = nacuerdos
+        if row[0] in count_idacuerdos:
+            a3 = count_idacuerdos[row[0]]
+        else:
+            a3 = 0
         t = (a0,a1,a2,a3)
         data.append(t)   
     cur.close()
@@ -281,13 +288,15 @@ def acuerdos_add(idconsultor, usuario, pais):
         cur.execute(msql)
         freegoods = cur.fetchall()
         # range of freegoods
-        idrange =str(tuple(["246"]+[ str(x) for x in range(274,286)]  + ["296","297","335"] + [ str(x) for x in range(336,351)] ))
+        idrange =str(tuple(["246"]+[ str(x) for x in range(274,286)]  + ["296","297","335"] + ["480","481","482","483"] ))
         msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and idfreegood in " + idrange + " order by idplazo"
+        print(msql)
         cur.execute(msql)
         plazos2 = cur.fetchall()
-        plazos = plazos + plazos2
+        plazos = list(set(plazos + plazos2))
+        plazos.sort()
         msql = "select * from dt_freegood where pais = '" + pais + "' and idfreegood in " + idrange + " order by idplazo,banda"
-        print(msql)
+
         cur.execute(msql)
         freegoods2 = cur.fetchall()
         freegoods = freegoods + freegoods2
@@ -1520,42 +1529,46 @@ def api_acuerdos(pais,vigente):
     # Verifica que los acuerdos esten vencidos
     authorization = request.headers.get('Authorization')
     if authorization == app.config['API_SECRET_KEY']:
-        acuerdos_sin_vigencia()
-        conn = psycopg2.connect(db_connection_string)
-        cur = conn.cursor()
-        # Busca acuerdos del usuario
-        if vigente == "vigente":
-            msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' and vigente=1"
-        elif vigente == "antiguo":
-            msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' and vigente=0"
+        #por ahora, solo disponible en Argentina
+        if pais != "AR":
+            return jsonify({"Error": "No Autorizado"})
         else:
-            msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "'"
-        # msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, da.cantidad_periodo from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' order by dl.idacuerdo,dl.corte"
-        cur.execute(msql)
-        data = cur.fetchall()
-        dataarr = []
-        for d in data:
-            datadict = {
-                "idacuerdo" : d[0],
-                "idconsultor": d[1],
-                "consultor": d[2],
-                "idcliente": d[3],
-                "cliente": d[4],
-                "mes_ini":d[5],
-                "ano_ini":d[6],
-                "tipoacuerdo":d[7],
-                "cantidad_periodo":d[8],
-                "duracion": d[9],
-                "unidades_total": d[10],
-                "banda": d[11],
-                "freegoods":d[12],
-                "mes_fin":d[13],
-                "ano_fin":d[14],
-                "vigente":d[15],
-                "pais":d[16],
-                "fecha_creacion":d[17],
-            }
-            dataarr.append(datadict)
-        return jsonify(dataarr)
+            acuerdos_sin_vigencia()
+            conn = psycopg2.connect(db_connection_string)
+            cur = conn.cursor()
+            # Busca acuerdos del usuario
+            if vigente == "vigente":
+                msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' and vigente=1"
+            elif vigente == "antiguo":
+                msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "' and vigente=0"
+            else:
+                msql = "SELECT * FROM dt_acuerdo where pais = '" + pais + "'"
+            # msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, da.cantidad_periodo from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' order by dl.idacuerdo,dl.corte"
+            cur.execute(msql)
+            data = cur.fetchall()
+            dataarr = []
+            for d in data:
+                datadict = {
+                    "idacuerdo" : d[0],
+                    "idconsultor": d[1],
+                    "consultor": d[2],
+                    "idcliente": d[3],
+                    "cliente": d[4],
+                    "mes_ini":d[5],
+                    "ano_ini":d[6],
+                    "tipoacuerdo":d[7],
+                    "cantidad_periodo":d[8],
+                    "duracion": d[9],
+                    "unidades_total": d[10],
+                    "banda": d[11],
+                    "freegoods":d[12],
+                    "mes_fin":d[13],
+                    "ano_fin":d[14],
+                    "vigente":d[15],
+                    "pais":d[16],
+                    "fecha_creacion":d[17],
+                }
+                dataarr.append(datadict)
+            return jsonify(dataarr)
     else:
-        return jsonify({"Error":"No Autorizado"})
+            return jsonify({"Error":"No Autorizado"})
