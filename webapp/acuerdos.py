@@ -288,7 +288,7 @@ def acuerdos_add(idconsultor, usuario, pais):
         cur.execute(msql)
         freegoods = cur.fetchall()
         # range of freegoods
-        idrange =str(tuple(["246"]+[ str(x) for x in range(274,286)]  + ["296","297","335"] + ["480","481","482","483"] ))
+        idrange =str(tuple([ str(x) for x in range(529,546)]  ))
         msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and idfreegood in " + idrange + " order by idplazo"
         print(msql)
         cur.execute(msql)

@@ -82,12 +82,15 @@
         {% if session['nivel'] == 1 %}
           i=1
           #Aqui van los deshabilidos
-          <option disabled>2021</option>           
+          <option disabled>2021</option>
+                  <option disabled>2022</option>
+          <option disabled>2023</option>
         {% else %}          
-          <option>2021</option>           
+          <option>2021</option>
+             <option>2022</option>
+          <option>2023</option>
         {% endif %}                                  
-          <option>2022</option> 
-          <option>2023</option> 
+
           <option>2024</option> 
           <option>2025</option> 
       </select>       
@@ -100,7 +103,9 @@
           <option>2022</option> 
           <option>2023</option> 
           <option>2024</option> 
-          <option>2025</option> 
+          <option>2025</option>
+           <option>2026</option>
+
       </select>       
     </div>    
   </div>   
@@ -153,10 +158,18 @@
     const option = document.createElement('option')
     option.value = mvalue
     option.innerText = mtext
-    if (nivel == 1 & pais != 'CL'){
-      if (mvalue < currentMonth){
+    if (nivel == 1){
+        if (pais == 'AR'){
+              if (mvalue != currentMonth){
         option.disabled = true
       }
+        }
+        else {
+                 if (mvalue < currentMonth){
+        option.disabled = true
+      }
+        }
+
     }
     mesPicker.appendChild(option)
 
