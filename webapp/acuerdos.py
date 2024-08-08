@@ -123,7 +123,7 @@ def acuerdosdetalle(idconsultor, usuario, pais):
 
     cur.close()
     conn.close()
-    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais, url = "acuerdosdetalleantiguos")
+    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor, usuario = usuario, pais = pais, url ="acuerdosdetalleantiguos")
 
 @app.route('/acuerdosdetalleantiguos/<string:idconsultor>/<string:usuario>/<string:pais>', methods=['GET'])
 def acuerdosdetalleantiguos(idconsultor, usuario, pais):
@@ -162,7 +162,7 @@ def acuerdosdetalleantiguos(idconsultor, usuario, pais):
 
     cur.close()
     conn.close()
-    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor ,usuario = usuario , pais = pais, url = "acuerdosdetalle")
+    return render_template('acuerdos/acuerdosdetalle.html', data = mdata, idconsultor = idconsultor, usuario = usuario, pais = pais, url ="acuerdosdetalle")
 
 
 
@@ -288,18 +288,18 @@ def acuerdos_add(idconsultor, usuario, pais):
         cur.execute(msql)
         freegoods = cur.fetchall()
         # range of freegoods
-        idrange =str(tuple([ str(x) for x in range(529,546)]  ))
-        msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and idfreegood in " + idrange + " order by idplazo"
+        idrange =str(tuple([ str(x) for x in range(529,546)]))
+        msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and idfreegood in " + idrange + " order by idplazo "
         print(msql)
         cur.execute(msql)
         plazos2 = cur.fetchall()
-        plazos = list(set(plazos + plazos2))
-        plazos.sort()
-        msql = "select * from dt_freegood where pais = '" + pais + "' and idfreegood in " + idrange + " order by idplazo,banda"
-
-        cur.execute(msql)
-        freegoods2 = cur.fetchall()
-        freegoods = freegoods + freegoods2
+        if pais == 'AR':
+            plazos = list(set(plazos + plazos2))
+            plazos.sort()
+            msql = "select * from dt_freegood where pais = '" + pais + "' and idfreegood in " + idrange + " order by idplazo,banda"
+            cur.execute(msql)
+            freegoods2 = cur.fetchall()
+            freegoods = freegoods + freegoods2
 
     else:
         msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and usar = 1 order by idplazo"
@@ -421,6 +421,8 @@ def acuerdos_editar(idacuerdo):
     msql = "select *  from dt_acuerdo where idacuerdo = '" + idacuerdo + "'"
     cur.execute(msql)
     registro = cur.fetchone()
+    #banda actual del acuerdo
+    currentBanda = registro[11]
     if session["nivel"] == -1:
         msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and usar = 1 order by idplazo"
         cur.execute(msql)
@@ -429,8 +431,7 @@ def acuerdos_editar(idacuerdo):
         cur.execute(msql)
         freegoods = cur.fetchall()
         # range of freegoods
-        idrange = str(tuple(
-            ["246"] + [str(x) for x in range(274, 286)] + ["296", "297", "335"] + [str(x) for x in range(336, 351)]))
+        idrange = str(tuple([currentBanda] + [str(x) for x in range(529, 546)]))
         msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and idfreegood in " + idrange + " order by idplazo"
         cur.execute(msql)
         plazos2 = cur.fetchall()
@@ -451,7 +452,7 @@ def acuerdos_editar(idacuerdo):
 
     cur.close()
     conn.close()
-    return render_template('acuerdos/acuerdos_edit.html',  consultores = consultores, clientes = clientes, registro = registro, freegoods = freegoods, plazos = plazos)
+    return render_template('acuerdos/acuerdos_edit.html', consultores = consultores, clientes = clientes, registro = registro, freegoods = freegoods, plazos = plazos)
 
 
 @app.route('/acuerdos_editar_salvar', methods=['POST'])
@@ -499,6 +500,7 @@ def acuerdos_editar_salvar():
     cur = conn.cursor()
     try:    
         cur.execute(msql)
+        print(msql)
         conn.commit()
         mensaje = 'Acuerdo Guardado'
         # Crea las liberaciones nuevamente
@@ -605,7 +607,7 @@ def cliente_adicional(idconsultor, usuario, pais,idacuerdo):
     clientes = cur.fetchall() 
     cur.close()
     conn.close()    
-    return render_template('acuerdos/cliente_adicional.html', idconsultor = idconsultor, usuario = usuario, pais = pais, idacuerdo = idacuerdo , acuerdo_clientes =acuerdo_clientes , clientes = clientes, acuerdo_clientes_add = acuerdo_clientes_add)
+    return render_template('acuerdos/cliente_adicional.html', idconsultor = idconsultor, usuario = usuario, pais = pais, idacuerdo = idacuerdo, acuerdo_clientes =acuerdo_clientes, clientes = clientes, acuerdo_clientes_add = acuerdo_clientes_add)
 
 @app.route('/cliente_adicional_guardar/<string:idconsultor>/<string:usuario>/<string:pais>/<string:idacuerdo>/<string:idcliente>/<string:cliente>', methods=['POST'])
 def cliente_adicional_guardar(idconsultor, usuario, pais,idacuerdo,idcliente,cliente):
@@ -658,14 +660,30 @@ def todosacuerdos():
     cur = conn.cursor()
     # Busca acuerdos del usuario
     if session['nivel'] == 1:
-        msql =  "SELECT * FROM dt_acuerdo where pais = '" + session['pais'] + "' and idconsultor = '" + session['idconsultor'] + "'"
+        msql = "select a.*,cm.idclientes,cm.clientes from dt_acuerdo a left join (" \
+               "select idacuerdo, string_agg(cliente,',' order by cliente asc) as clientes, string_agg(idcliente,',' order by cliente asc) as idclientes from dt_cliente_multiple group by idacuerdo) cm" \
+               " on a.idacuerdo = cm.idacuerdo where pais = '" + session['pais'] + "' and idconsultor = '" + session['idconsultor'] + "'"
     else:
-        msql =  "SELECT * FROM dt_acuerdo where pais = '" + session['pais'] + "'"
+        msql = "select a.*,cm.idclientes,cm.clientes from dt_acuerdo a left join (" \
+               "select idacuerdo, string_agg(cliente,',' order by cliente asc) as clientes, string_agg(idcliente,',' order by cliente asc) as idclientes from dt_cliente_multiple group by idacuerdo) cm" \
+               " on a.idacuerdo = cm.idacuerdo where pais = '" + session['pais'] + "'"
         #msql =  "SELECT dl.idacuerdo, dl.consultor, dl.idcliente, dl.cliente, dl.duracion , dl.corte, dl.detalle_periodo, dl.mes_entrega, dl.ano_entrega, dl.meta_corte, dl.fgs_sobre_cien, dl.fgs_teoricos, dl.total_venta, dl.botox, dl.ultra, dl.ultra_plus, dl.volbella, dl.volift, dl.volite, dl.voluma, dl.volux, dl.total_fgs, idcliente1, cliente1, idcliente2, cliente2, idcliente3, cliente3, idcliente4, cliente4, da.cantidad_periodo from dt_liberacion dl inner join dt_acuerdo da  ON dl.idacuerdo = da.idacuerdo where dl.pais = '" +  session['pais']  + "' order by dl.idacuerdo,dl.corte"
     cur.execute(msql)
-    data = cur.fetchall()
+    data = [list(r) for r in cur.fetchall()]
     archivequantity = []
     for r in data:
+        #print(r[30],r[31])
+        if r[30] == None:
+            r.append(["","","","",""])
+            r.append(["", "", "", "",""])
+        else:
+            idclientes = r[30].split(",")
+            idclientes = idclientes + [""] *  (5 - len(idclientes))
+            clientes = r[31].split(",")
+            clientes = clientes + [""] *  (5 - len(clientes))
+            r.append(idclientes)
+            r.append(clientes)
+
         path = os.path.join(app.config['UPLOAD_FOLDER'], r[0])
         try:
             archivequantity.append(len(os.listdir(path)))
@@ -683,7 +701,9 @@ def todosacuerdos():
     for e in cur.fetchall():
         nombres.append(list(e))
     cur.close()
+    msql = ""
     conn.close()
+
 
     return render_template('acuerdos/todosacuerdos.html', data=data, precios=precios, nombres=nombres,
                            aq=archivequantity)

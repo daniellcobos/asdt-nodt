@@ -26,10 +26,11 @@
         <th>Vigente</th>
         <th>Aprobado</th>
           <th>Archivos</th>
-        <th>% Descuento</th>
+
         <th>Id Acuerdo</th>
         <th>ID Consultor</th>
         <th>Consultor</th>
+           <th>% Descuento</th>
         <th>ID Cliente</th>
         <th>Cliente</th>
         <th>Cant. Mensual</th>
@@ -41,12 +42,22 @@
         <th>Mes Inicio Acuerdo</th>
         <th>Año Fin Acuerdo</th>
         <th>Mes Fin Acuerdo</th>
+          <th>Id Cliente Multiple 1</th>
+          <th>Nombre Cliente Multiple 1</th>
+             <th>Id Cliente Multiple 2</th>
+          <th>Nombre Cliente Multiple 2</th>
+             <th>Id Cliente Multiple 3</th>
+          <th>Nombre Cliente Multiple 3</th>
+             <th>Id Cliente Multiple 4</th>
+          <th>Nombre Cliente Multiple 4</th>
+             <th>Id Cliente Multiple 5</th>
+          <th>Nombre Cliente Multiple 5</th>
       </tr>
       </thead>
 </table>
  <script>
     const precios = {{ precios| safe }}
-    console.log(precios)
+
     const nombres = {{ nombres| safe }}
     const aq = {{ aq|safe }}
 
@@ -58,6 +69,7 @@
         newTh.innerText = nombre
         tableHead.appendChild(newTh)
     }
+
 
 
 
@@ -105,12 +117,12 @@
       {% if (session['nivel'] == -1) %}            
      row = [
           '<input type="checkbox" class="btn btn-light" data-toggle="tooltip" data-placement="top" title="Editar Acuerdo" id="row{{ row[0] }}" value = "{{ row[0] }}"> Editar</input>',
-          mvigente,maprobado,"<a href='constancia/{{ row[0] }}'>Subir Archivos ({{ aq[loop.index0]}})</a>",fnt_format_procentaje({{ row[25] }},0),'{{ row[0] }}','{{ row[1] }}','{{ row[2] }}','{{ row[3] }}','{{ row[4] }}','{{ row[8] }}','{{ row[9] }}','{{ row[10] }}' ,
-            '{{ row[11] }}', '{{ row[12] }}', '{{ row[6] }}', mes_ini,'{{ row[14] }}', mes_fin ];
+          mvigente,maprobado,"<a href='constancia/{{ row[0] }}'>Subir Archivos ({{ aq[loop.index0]}})</a>",'{{ row[0] }}','{{ row[1] }}','{{ row[2] }}',fnt_format_procentaje({{ row[25] }},0),'{{ row[3] }}','{{ row[4] }}','{{ row[8] }}','{{ row[9] }}','{{ row[10] }}' ,
+            '{{ row[11] }}', '{{ row[12] }}', '{{ row[6] }}', mes_ini,'{{ row[14] }}', mes_fin, "{{ row[32][0] }}", "{{ row[33][0] }}",  "{{ row[32][1] }}", "{{ row[33][1] }}", "{{ row[32][2] }}", "{{ row[33][2] }}", "{{ row[32][3] }}", "{{ row[33][3] }}", "{{ row[32][4] }}", "{{ row[33][4] }}" ];
       {% else %}
-      row = [
+      row =
           'ND',
-          mvigente,maprobado,"<a href='constancia/{{ row[0] }}'>Subir Archivos ({{ aq[loop.index0]}})</a>",fnt_format_procentaje({{ row[25] }},0),'{{ row[0] }}','{{ row[1] }}','{{ row[2] }}','{{ row[3] }}','{{ row[4] }}','{{ row[8] }}','{{ row[9] }}','{{ row[10] }}' ,'{{ row[11] }}', '{{ row[12] }}', '{{ row[6] }}', mes_ini,'{{ row[14] }}', mes_fin ];
+          mvigente,maprobado,"<a href='constancia/{{ row[0] }}'>Subir Archivos ({{ aq[loop.index0]}})</a>",'{{ row[0] }}','{{ row[1] }}','{{ row[2] }}',fnt_format_procentaje({{ row[25] }},0),'{{ row[3] }}','{{ row[4] }}','{{ row[8] }}','{{ row[9] }}','{{ row[10] }}' ,'{{ row[11] }}', '{{ row[12] }}', '{{ row[6] }}', mes_ini,'{{ row[14] }}', mes_fin ];
       {% endif %}
 
       i = i + 1;
@@ -149,9 +161,21 @@
           }
 
         });
+        //Esconder Columnas de Precios
+        const targets = []
+        for (const i in nombres){
+            targets.push(29+parseInt(i))
+        }
+        console.log(targets)
+        const columnDefsPrecios =  [
+            {'visible': false, 'targets':targets}
+    ]
 
-        var table = $('#dt').DataTable( {    
-        aLengthMenu: [ [10, 20, 50, 100, -1], [10, 20, 50, 100, "Todos"] ], 
+
+        var table = $('#dt').DataTable( {
+
+        aLengthMenu: [ [10, 20, 50, 100, -1], [10, 20, 50, 100, "Todos"] ],
+        columnDefs : columnDefsPrecios,
         dom: 'Blfrtip',
         buttons: ['copy', 'excel'],                        
         data : dt,         
