@@ -140,6 +140,8 @@
 <br>  
 <hr>
 <td><button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Agregar Guardar" onclick="btn_guardar()">Guardar</button></td>
+<hr>
+<td><button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Agregar Otro"  onClick="refreshPage()">Agregar otro acuerdo</button></td>
 <!-- <td><a class="btn btn-primary" href="/acuerdosdetalle/{{ idconsultor }}/{{ usuario }}/{{ pais }}" role="button"  data-toggle="tooltip" data-placement="top">Volver</a></td> -->
 <hr>
 <script>
@@ -177,7 +179,9 @@
 </script>
 
   <script>
-
+function refreshPage(){
+    window.location.reload();
+}
   // Vectores
   idmax = [];
   mdescuento = 0; 

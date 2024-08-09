@@ -120,9 +120,9 @@
           mvigente,maprobado,"<a href='constancia/{{ row[0] }}'>Subir Archivos ({{ aq[loop.index0]}})</a>",'{{ row[0] }}','{{ row[1] }}','{{ row[2] }}',fnt_format_procentaje({{ row[25] }},0),'{{ row[3] }}','{{ row[4] }}','{{ row[8] }}','{{ row[9] }}','{{ row[10] }}' ,
             '{{ row[11] }}', '{{ row[12] }}', '{{ row[6] }}', mes_ini,'{{ row[14] }}', mes_fin, "{{ row[32][0] }}", "{{ row[33][0] }}",  "{{ row[32][1] }}", "{{ row[33][1] }}", "{{ row[32][2] }}", "{{ row[33][2] }}", "{{ row[32][3] }}", "{{ row[33][3] }}", "{{ row[32][4] }}", "{{ row[33][4] }}" ];
       {% else %}
-      row =
+      row =[
           'ND',
-          mvigente,maprobado,"<a href='constancia/{{ row[0] }}'>Subir Archivos ({{ aq[loop.index0]}})</a>",'{{ row[0] }}','{{ row[1] }}','{{ row[2] }}',fnt_format_procentaje({{ row[25] }},0),'{{ row[3] }}','{{ row[4] }}','{{ row[8] }}','{{ row[9] }}','{{ row[10] }}' ,'{{ row[11] }}', '{{ row[12] }}', '{{ row[6] }}', mes_ini,'{{ row[14] }}', mes_fin ];
+          mvigente,maprobado,"<a href='constancia/{{ row[0] }}'>Subir Archivos ({{ aq[loop.index0]}})</a>",'{{ row[0] }}','{{ row[1] }}','{{ row[2] }}',fnt_format_procentaje({{ row[25] }},0),'{{ row[3] }}','{{ row[4] }}','{{ row[8] }}','{{ row[9] }}','{{ row[10] }}' ,'{{ row[11] }}', '{{ row[12] }}', '{{ row[6] }}', mes_ini,'{{ row[14] }}', mes_fin , "{{ row[32][0] }}", "{{ row[33][0] }}",  "{{ row[32][1] }}", "{{ row[33][1] }}", "{{ row[32][2] }}", "{{ row[33][2] }}", "{{ row[32][3] }}", "{{ row[33][3] }}", "{{ row[32][4] }}", "{{ row[33][4] }}" ];
       {% endif %}
 
       i = i + 1;

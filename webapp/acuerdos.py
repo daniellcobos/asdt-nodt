@@ -288,7 +288,7 @@ def acuerdos_add(idconsultor, usuario, pais):
         cur.execute(msql)
         freegoods = cur.fetchall()
         # range of freegoods
-        idrange =str(tuple([ str(x) for x in range(529,546)]))
+        idrange =str(tuple([ str(x) for x in range(529,546)]+ ["569","570","571"]))
         msql = "select distinct plazo, idplazo from dt_freegood where pais = '" + pais + "'  and idfreegood in " + idrange + " order by idplazo "
         print(msql)
         cur.execute(msql)
@@ -357,10 +357,11 @@ def acuerdos_guardar():
     cur.execute(msql)
     df = cur.fetchall()
     #revisa acuerdos vigentes en la tabla de acuerdos
-    msql = "SELECT idcliente, idacuerdo FROM dt_acuerdo where idcliente = %s and vigente = 1 union " \
-           "select idcliente, idacuerdo from dt_acuerdo where idacuerdo in (select idacuerdo from dt_cliente_multiple where idcliente = %s) and vigente = 1 order by idacuerdo asc"
+    msql = "SELECT idcliente, idacuerdo,mes_fin,ano_fin FROM dt_acuerdo where idcliente = %s and vigente = 1 union " \
+           "select idcliente, idacuerdo,mes_fin,ano_fin from dt_acuerdo where idacuerdo in (select idacuerdo from dt_cliente_multiple where idcliente = %s) and vigente = 1 order by idacuerdo asc"
     cur.execute(msql, (idcliente[0], idcliente[0]))
-    result=cur.fetchone()
+    result = cur.fetchall()
+
     #Para acuerdos que son parte de un historico que no han sido subidos
     yfin = int(ano_fin[0])
     mfin = int(mes_fin[0])
@@ -368,15 +369,28 @@ def acuerdos_guardar():
     today = datetime.today()
     tmes = datetime(today.year,today.month,1)
     actual = fecha_final >= tmes
-    if result != None:
-        if session['nivel'] == -1 and actual:
-            mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result)
-            print(mensaje)
-            return mensaje
-        elif session['nivel'] != -1:
-            mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result)
-            print(mensaje)
-            return mensaje
+    if len(result) > 0:
+        if session['pais'] == 'CL' and len(result) < 2:
+            if result[0][2] == today.month and result[0][3] == today.year:
+                pass
+            else:
+                if session['nivel'] == -1 and actual:
+                    mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result)
+                    print(mensaje)
+                    return mensaje
+                elif session['nivel'] != -1:
+                    mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result)
+                    print(mensaje)
+                    return mensaje
+        else:
+            if session['nivel'] == -1 and actual:
+                mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result[0])
+                print(mensaje)
+                return mensaje
+            elif session['nivel'] != -1:
+                mensaje = "Este cliente ya tiene acuerdos vigentes:" + str(result[0])
+                print(mensaje)
+                return mensaje
 
 
     msql = "INSERT INTO dt_acuerdo "
@@ -677,6 +691,7 @@ def todosacuerdos():
             r.append(["","","","",""])
             r.append(["", "", "", "",""])
         else:
+            #Si encuentra clientes, los expande en un nuevo array, que luego pone en los datos
             idclientes = r[30].split(",")
             idclientes = idclientes + [""] *  (5 - len(idclientes))
             clientes = r[31].split(",")
