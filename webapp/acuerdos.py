@@ -927,9 +927,15 @@ def crear_liberacion(idacuerdo, idconsultor, consultor, idcliente, cliente, mes_
         t3 = [f1.strftime("%B") + "-" + f2.strftime("%B"), f5.strftime("%B"), ano_entrega2, v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8]]
         meta = cantidad_periodo * duracion
         teorico = (meta) * (fgs_sobre_cien / 100)
+        if teorico % 2 == 0:
+            teorico1 = teorico/2
+            teorico2 = teorico/2
+        else:
+            teorico1 = teorico / 2
+            teorico2 = (teorico / 2) - 1
         cumplimiento = 0
-        insertar_liberacion(periodo, pais, idacuerdo, consultor, idcliente, cliente, duracion,  "1", t[0], t[1], t[2], meta , fgs_sobre_cien, teorico, cumplimiento,  t[3], t[4], t[5], t[6], t[7], t[8], t[9], t[10], t[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
-        insertar_liberacion(periodo2, pais, idacuerdo, consultor, idcliente, cliente, duracion, "2", t2[0], t2[1], t2[2],meta, fgs_sobre_cien, teorico, cumplimiento, t2[3], t2[4], t2[5], t2[6], t2[7], t2[8], t2[9],t2[10], t2[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
+        insertar_liberacion(periodo, pais, idacuerdo, consultor, idcliente, cliente, duracion,  "1", t[0], t[1], t[2], meta , fgs_sobre_cien, teorico1, cumplimiento,  t[3], t[4], t[5], t[6], t[7], t[8], t[9], t[10], t[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
+        insertar_liberacion(periodo2, pais, idacuerdo, consultor, idcliente, cliente, duracion, "2", t2[0], t2[1], t2[2],meta, fgs_sobre_cien, teorico2, cumplimiento, t2[3], t2[4], t2[5], t2[6], t2[7], t2[8], t2[9],t2[10], t2[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
         insertar_liberacion(periodo3, pais, idacuerdo, consultor, idcliente, cliente, duracion,  "Cierre", t3[0], t3[1], t3[2], meta , fgs_sobre_cien, teorico, cumplimiento,  t3[3], t3[4], t3[5], t3[6], t3[7], t3[8], t3[9], t3[10], t3[11], idc[0], cl[0], idc[1], cl[1], idc[2], cl[2], idc[3], cl[3])
 
         
@@ -1116,6 +1122,22 @@ def reprocesar_acuerdo():
     consolidar_acuerdo(idacuerdo)
     return redirect("/liberaciones_total")
 
+@app.route('/reprocesar/3', methods=['GET','POST'])
+def reprocesar_acuerdo4():
+    conn = psycopg2.connect(db_connection_string)
+    cur = conn.cursor()
+    msql = "select idacuerdo from dt_acuerdo where ano_fin = 2023 and pais = 'AR'"
+    cur.execute(msql)
+    acuerdos = cur.fetchall()
+    print(acuerdos)
+    for idacuerdo in acuerdos:
+        #borrar_liberaciones_acuerdo(idacuerdo[0])
+        #crear_liberaciones_acuerdo(idacuerdo[0])
+        consolidar_acuerdo(idacuerdo[0])
+    conn.close()
+    return redirect("/liberaciones_total")
+
+
 
 @app.route('/ventasxacuerdos/', methods=['GET'])
 def ventasxacuerdos():
@@ -1281,6 +1303,7 @@ def consolidar_total():
 
 @app.route('/totalizar_ventas/<string:idacuerdo>', methods=['GET','POST'])
 def totalizar_ventas(idacuerdo):
+    print(idacuerdo)
     archivolog = os.path.join(app.root_path, 'static/', "uploadlog.txt")
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()    
@@ -1492,7 +1515,7 @@ def totalizar_ventas(idacuerdo):
                 p8 = 0
             if p9 <0:
                 p9 = 0
-            print("free",p1, p2, p3, p4, p5, p6, p7, p8, p9)
+            #print("free",p1, p2, p3, p4, p5, p6, p7, p8, p9)
 
 
             msql = "UPDATE dt_liberacion SET total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ",harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and periodo = " + str(periodo)
@@ -1525,9 +1548,9 @@ def totalizar_ventas(idacuerdo):
             #print("mtotal",mtotal)
             #Obtiene el producto mas vendido
             bigger = {"botox": p1, "ultra": p2 ,"ultra_plus": p3, "volbella": p4, "volift": p5, "volite": p6, "voluma": p7, "volux": p8, "harmonyca": p9}
-            print("BIGGER",bigger)
+            #print("BIGGER",bigger)
             biggerone = max(bigger, key=bigger.get)
-            print(biggerone)
+            #print(biggerone)
             msql = "UPDATE dt_liberacion SET fgs_teoricos = " + str(mteoricos) +  ", total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ", harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and corte = 'Cierre' "
 
             #print(msql)
@@ -1537,7 +1560,7 @@ def totalizar_ventas(idacuerdo):
             conn.commit()
         
     mtotalac = round(mtotalac)
-    print("mtotalac",mtotalac)
+    #print("mtotalac",mtotalac)
     #Redondeo vs Suma en cierre
     if mtotalac > mtotal:
         msql = "UPDATE dt_liberacion set total_fgs= total_fgs+1 WHERE idacuerdo = %s and corte = %s"

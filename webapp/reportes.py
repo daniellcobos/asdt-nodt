@@ -67,6 +67,7 @@ def liberaciones_total():
 
     arr = []
 
+
     for t in data:
         arr.append(t)    
 
@@ -84,17 +85,25 @@ def liberaciones_total():
         p = int(p)
 
 
-        if (int(t[4]) < 4) or (t[5] == 'Cierre'):
+        if (t[5] == 'Cierre'):
             t[34] = ""
-        elif (p > mperiodo):
-            t[34] = ""
-        elif (int(t[32])*3) > int(t[12]) :
-            t[34] = "Incumple"
-        elif (int(t[32])*3) <= int(t[12]) and (int(t[12]) <= int(t[33])*3):
-            t[34] = "Cumple"
-        elif (int(t[12]) > int(t[33])*3):
-            t[34] = "Excede"
-            
+        elif (int(t[4]) == 4) or (int(t[4]) == 2) :
+            if (int(t[32]) * 2) > int(t[12]):
+                t[34] = "Incumple"
+            elif (int(t[32]) * 2) <= int(t[12]) and (int(t[12]) <= int(t[33]) * 2):
+                t[34] = "Cumple"
+            elif (int(t[12]) > int(t[33]) * 2):
+                t[34] = "Excede"
+        elif (int(t[4]) > 4) or  (int(t[4]) == 3) :
+            if (int(t[32])*3) > int(t[12]) :
+
+                t[34] = "Incumple"
+            elif (int(t[32])*3) <= int(t[12]) and (int(t[12]) <= int(t[33])*3):
+                t[34] = "Cumple"
+            elif (int(t[12]) > int(t[33])*3):
+                t[34] = "Excede"
+            elif (p > mperiodo):
+                    t[34] = ""
     
     altarr = []
     for row in arr:
