@@ -16,6 +16,8 @@ import smtplib, ssl
 from email.mime.text import MIMEText
 from webapp import app
 from flask_cors import CORS
+import datetime
+
 app.config.from_object('configuraciones.local')
 db_connection_string = app.config["POSTGRESQL_CONNECTION"]
 
@@ -1122,20 +1124,7 @@ def reprocesar_acuerdo():
     consolidar_acuerdo(idacuerdo)
     return redirect("/liberaciones_total")
 
-@app.route('/reprocesar/3', methods=['GET','POST'])
-def reprocesar_acuerdo4():
-    conn = psycopg2.connect(db_connection_string)
-    cur = conn.cursor()
-    msql = "select idacuerdo from dt_acuerdo where ano_fin = 2023 and pais = 'AR'"
-    cur.execute(msql)
-    acuerdos = cur.fetchall()
-    print(acuerdos)
-    for idacuerdo in acuerdos:
-        #borrar_liberaciones_acuerdo(idacuerdo[0])
-        #crear_liberaciones_acuerdo(idacuerdo[0])
-        consolidar_acuerdo(idacuerdo[0])
-    conn.close()
-    return redirect("/liberaciones_total")
+
 
 
 
@@ -1224,19 +1213,36 @@ def ventasxacuerdos():
 def consolidar():
     conn = psycopg2.connect(db_connection_string)
     cur = conn.cursor()
-
+    current_time = datetime.now()
     #ventasxacuerdos()
+    month = current_time.month
+    year = current_time.year
+    if month == 1:
+        pastmonth = 12
+        year = year - 1
+    else:
+        pastmonth = month - 1
+
+
 
     # Extrae los acuerdos que tienen ventas y estan vigentes
     pais =  session['pais']    
     msql = "SELECT DISTINCT dt_ventas.idacuerdo from dt_ventas  WHERE PAIS = %s and dt_ventas.idacuerdo <> ''" \
           " and dt_ventas.idacuerdo in (select dt_acuerdo.idacuerdo from dt_acuerdo where vigente = 1)"
     #msql = "SELECT DISTINCT idacuerdo from dt_ventas WHERE PAIS = '"+ pais +"' and idacuerdo =  'CO-20220008' "
+    #Seleccionar acuerdos que terminaron el mes pasado
     cur.execute(msql, (pais,))
     df = cur.fetchall()
-    print(df)
+    msql2 = "SELECT DISTINCT dt_ventas.idacuerdo from dt_ventas  WHERE PAIS = %s and dt_ventas.idacuerdo <> ''" \
+            " and dt_ventas.idacuerdo in (select dt_acuerdo.idacuerdo from dt_acuerdo where ano_fin = (%s) and mes_fin = (%s) and pais = %s)"
+    cur.execute(msql2, (pais,year,pastmonth,pais))
+    df2 = cur.fetchall()
+    df3 = df + df2
+
+    print(len(df3))
+    print(df3)
     i = 0
-    for row in df:
+    for row in df3:
         msql = "SELECT * from dt_acuerdo where idacuerdo = '" + str(row[0]) + "' and PAIS = '"+ pais +"' order by idacuerdo"
         #msql = "SELECT * from dt_acuerdo where idacuerdo = '" + str(row[0]) + "' and PAIS = '"+ pais +"' and idacuerdo =  'CO-20220249' order by idacuerdo"
         cur.execute(msql)
@@ -1284,10 +1290,10 @@ def consolidar_total():
 
     # Extrae los acuerdos que tienen ventas
     pais =  session['pais']
-    msql = "SELECT DISTINCT idacuerdo from dt_ventas WHERE PAIS = '"+ pais +"' and idacuerdo <> ''"
+    msql = "SELECT DISTINCT idacuerdo from dt_ventas WHERE PAIS = '"+ pais +"' and idacuerdo <> '' and idperiodo > 202301"
     cur.execute(msql)
     df = cur.fetchall()
-    #print(df)
+    print(len(df))
     i = 0
     for row in df:
         msql = "SELECT * from dt_acuerdo where idacuerdo = '" + str(row[0]) + "' and PAIS = '"+ pais +"' order by idacuerdo"
@@ -1520,6 +1526,7 @@ def totalizar_ventas(idacuerdo):
 
             msql = "UPDATE dt_liberacion SET total_venta = " + str(mventa)  + ", botox= " + str(p1) + ", ultra= " + str(p2) + ", ultra_plus= " + str(p3) + ", volbella= " + str(p4) + ", volift= " + str(p5) + ", volite= " + str(p6) + ", voluma= " + str(p7) + ", volux= " + str(p8) + ",harmonyca= " + str(p9) + ", total_fgs= " + str(mtotal) + " WHERE idacuerdo = '" +  idacuerdo + "' and periodo = " + str(periodo)
             #print(msql)
+            print(idacuerdo,corte,mventa)
             cur.execute(msql)
             conn.commit()
         else:

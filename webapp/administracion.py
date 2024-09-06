@@ -285,7 +285,7 @@ def ventas_insertar(invoice_date, venta_mes, venta_ano, sap_id, pais, producto, 
 
     return mensaje 
 
-def pcd_identificar_ventaxacuerdo(idacuerdo):
+def pcd_identificar_ventaxacuerdo(idacuerdo,pais):
   conn = psycopg2.connect(db_connection_string)
   cur = conn.cursor()
 
@@ -343,7 +343,7 @@ def pcd_identificar_ventaxacuerdo(idacuerdo):
   print(clientes)
   for cliente in clientes:  
     for periodo in periodos:    
-      msql = "update dt_ventas set idacuerdo = '"+ idacuerdo + "' where sap_id = '" + cliente + "' and idperiodo = '" + periodo.strftime("%Y%m") + "'"
+      msql = "update dt_ventas set idacuerdo = '"+ idacuerdo + "' where sap_id = '" + cliente + "' and idperiodo = '" + periodo.strftime("%Y%m") + "' and  pais = '" + pais + "'"
       cur.execute(msql)
       conn.commit()
 
@@ -367,7 +367,7 @@ def ventasxacuerdos1(pais):
 
     for index, row in df2.iterrows():
         idacuerdo = row.iloc[0]
-        pcd_identificar_ventaxacuerdo(idacuerdo)
+        pcd_identificar_ventaxacuerdo(idacuerdo,pais)
         print(str(index) + " acuerdo :" + str(idacuerdo))
 
     cur.close()

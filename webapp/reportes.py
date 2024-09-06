@@ -49,7 +49,7 @@ def liberaciones_total():
 
 
 
-    msql = "select max(idperiodo) from dt_ventas where pais = '" + session['pais'] + "'"
+    msql = "select max(idperiodo) from dt_ventas where pais = '" + session['pais'] + "  '"
     cur.execute(msql)
     mperiodo = cur.fetchone()
     mperiodo = mperiodo[0]
